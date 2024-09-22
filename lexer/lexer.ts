@@ -253,7 +253,10 @@ function paragraphHandler(type: TOKEN.TOKEN_TYPE, key: string) {
 function headerHandler(type: TOKEN.TOKEN_TYPE, key: string) {
   return (lexer: Lexer.Lexer, regex: RegExp, raw_value: string) => {
     // extract body
-    const body = raw_value.slice(key.length, raw_value.length - 1);
+    const body =
+      raw_value[raw_value.length - 1] == '\n'
+        ? raw_value.slice(key.length, raw_value.length - 1)
+        : raw_value.slice(key.length);
     const tokens: (TOKEN.Token | string)[] = [];
 
     nestedSearch(Lexer.HEADER_NESTED_PATTERNS, body, type, tokens);
