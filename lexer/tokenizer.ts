@@ -15,10 +15,8 @@ export namespace TOKENIZER {
       let found = false;
       for (const pattern of options.patterns) {
         const exec_res = pattern.regex().exec(lexer.remainder());
-        // console.log(exec_res, pattern.regex, lexer.remainder());
 
         if (!exec_res) continue;
-
         if (exec_res['index'] != 0) {
           continue;
         }

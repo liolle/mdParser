@@ -17,8 +17,13 @@ export namespace Lexer {
     BOLD: {
       regex: () =>
         /((?<=[^\*]|^)\*{2}(?=[^\*]|$))[^\n]+((?<=[^\*]|^)\*{2}(?=[^\*]|$))/g,
-      handler: boldHandler(TOKEN.TOKEN_TYPE.BOLD, '**'),
+      handler: wrapperHandler(TOKEN.TOKEN_TYPE.BOLD),
       type: TOKEN.TOKEN_TYPE.BOLD,
+    },
+    ITALIC: {
+      regex: () => /((?<=[^_]|^)_(?=[^_]|$))[^\n]+((?<=[^_]|^)_(?=[^_]|$))/g,
+      handler: wrapperHandler(TOKEN.TOKEN_TYPE.ITALIC),
+      type: TOKEN.TOKEN_TYPE.ITALIC,
     },
     SPACE: {
       regex: () => / /,
@@ -74,7 +79,7 @@ export namespace Lexer {
   };
   export const ALL_PATTERNS: Pattern[] = [
     //
-    PATTERNS.BOLD,
+    // PATTERNS.BOLD,
     PATTERNS.H6,
     PATTERNS.H5,
     PATTERNS.H4,
@@ -89,12 +94,24 @@ export namespace Lexer {
   export const PARAGRAPH_NESTED_PATTERNS: Pattern[] = [
     //
     PATTERNS.BOLD,
+    PATTERNS.ITALIC,
     PATTERNS.WORD,
   ];
 
   export const HEADER_NESTED_PATTERNS: Pattern[] = [
     //
     PATTERNS.BOLD,
+    PATTERNS.ITALIC,
+    PATTERNS.WORD,
+  ];
+
+  export const BOLD_NESTED_PATTERNS: Pattern[] = [
+    //
+    PATTERNS.ITALIC,
+    PATTERNS.WORD,
+  ];
+  export const Italic_NESTED_PATTERNS: Pattern[] = [
+    //
     PATTERNS.WORD,
   ];
 
@@ -150,17 +167,64 @@ function defaultHandler(type: TOKEN.TOKEN_TYPE) {
   };
 }
 
-function boldHandler(type: TOKEN.TOKEN_TYPE, key: string) {
+function wrapperHandler(type: TOKEN.TOKEN_TYPE) {
   return (
     lexer: Lexer.Lexer,
     regex: RegExp,
     raw_value: string,
     nextMatch: number,
   ) => {
-    // extract body
-    const body = raw_value.slice(2, raw_value.length - 2);
+    let size = 1;
+    let patterns: Pattern[] = [];
 
-    lexer.push(new TOKEN.Token(type, TOKENIZER.tokenize(body)));
+    switch (type) {
+      case TOKEN.TOKEN_TYPE.BOLD:
+        size = 2;
+        patterns = Lexer.BOLD_NESTED_PATTERNS;
+        break;
+
+      case TOKEN.TOKEN_TYPE.ITALIC:
+        size = 1;
+        patterns = Lexer.Italic_NESTED_PATTERNS;
+        break;
+
+      default:
+        break;
+    }
+
+    // extract body
+    const body = raw_value.slice(size, raw_value.length - size);
+    const tokens: (TOKEN.Token | string)[] = [];
+    let next_idx = Infinity;
+
+    for (const pattern of patterns) {
+      const exec_res = pattern.regex().exec(body);
+      if (!exec_res) continue;
+      if (
+        exec_res['index'] != 0 ||
+        (pattern.type != type && pattern.type != TOKEN.TOKEN_TYPE.WORD)
+      ) {
+        next_idx = Math.min(next_idx, exec_res['index']);
+      }
+    }
+
+    // console.log('->', body, next_idx, type);
+
+    if (next_idx != Infinity) {
+      const word = body.slice(0, next_idx);
+      if (word.length > 0) {
+        tokens.push(new TOKEN.Token(TOKEN.TOKEN_TYPE.WORD, [word]));
+      }
+      tokens.push(
+        ...TOKENIZER.tokenize(body.slice(next_idx), {
+          patterns: patterns,
+        }),
+      );
+    } else {
+      tokens.push(new TOKEN.Token(TOKEN.TOKEN_TYPE.WORD, [body]));
+    }
+
+    lexer.push(new TOKEN.Token(type, tokens));
     lexer.bump(raw_value.length);
 
     return true;
@@ -183,19 +247,26 @@ function paragraphHandler(type: TOKEN.TOKEN_TYPE, key: string) {
     for (const pattern of Lexer.PARAGRAPH_NESTED_PATTERNS) {
       const exec_res = pattern.regex().exec(body);
       if (!exec_res) continue;
-      if (exec_res['index'] != 0) {
+      if (
+        exec_res['index'] != 0 ||
+        (pattern.type != type && pattern.type != TOKEN.TOKEN_TYPE.WORD)
+      ) {
         next_idx = Math.min(next_idx, exec_res['index']);
       }
     }
 
     if (next_idx != Infinity) {
       const word = body.slice(0, next_idx);
-      tokens.push(new TOKEN.Token(TOKEN.TOKEN_TYPE.WORD, [word]));
+      if (word.length > 0) {
+        tokens.push(new TOKEN.Token(TOKEN.TOKEN_TYPE.WORD, [word]));
+      }
       tokens.push(
         ...TOKENIZER.tokenize(body.slice(next_idx), {
           patterns: Lexer.PARAGRAPH_NESTED_PATTERNS,
         }),
       );
+    } else {
+      tokens.push(new TOKEN.Token(TOKEN.TOKEN_TYPE.WORD, [body]));
     }
 
     lexer.push(new TOKEN.Token(type, tokens));
@@ -221,14 +292,19 @@ function headerHandler(type: TOKEN.TOKEN_TYPE, key: string) {
     for (const pattern of Lexer.HEADER_NESTED_PATTERNS) {
       const exec_res = pattern.regex().exec(body);
       if (!exec_res) continue;
-      if (exec_res['index'] != 0) {
+      if (
+        exec_res['index'] != 0 ||
+        (pattern.type != type && pattern.type != TOKEN.TOKEN_TYPE.WORD)
+      ) {
         next_idx = Math.min(next_idx, exec_res['index']);
       }
     }
 
     if (next_idx != Infinity) {
       const word = body.slice(0, next_idx);
-      tokens.push(new TOKEN.Token(TOKEN.TOKEN_TYPE.WORD, [word]));
+      if (word.length > 0) {
+        tokens.push(new TOKEN.Token(TOKEN.TOKEN_TYPE.WORD, [word]));
+      }
       tokens.push(
         ...TOKENIZER.tokenize(body.slice(next_idx), {
           patterns: Lexer.HEADER_NESTED_PATTERNS,

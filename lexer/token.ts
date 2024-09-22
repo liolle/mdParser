@@ -1,6 +1,7 @@
 export namespace TOKEN {
   export enum TOKEN_TYPE {
     BOLD = 'Bold',
+    ITALIC = 'Italic',
     H1 = 'H1',
     H2 = 'H2',
     H3 = 'H3',
@@ -12,6 +13,7 @@ export namespace TOKEN {
     TILDE = 'Tilde',
     WORD = 'Word',
     ROOT = 'Root',
+    PARAGRAPH = 'Paragraph',
   }
   export const TOKEN_TYPE_HEADERS = [
     //
@@ -47,9 +49,9 @@ export namespace TOKEN {
 
     token.value.forEach(item => {
       if (typeof item === 'string') {
-        output += `: ${item}`;
+        output += `: ${item != '\n' ? item : ''}`;
       } else {
-        output += `\n${displayToken(item, indent + 2)}`;
+        output += `\n${displayToken(item, indent + 4)}`;
       }
     });
     return output;
