@@ -1,4 +1,6 @@
 import { Lexer } from './lexer/lexer';
+import { TOKEN } from './lexer/token';
+import { TOKENIZER } from './lexer/tokenizer';
 
 function main() {
   const source = `
@@ -25,7 +27,7 @@ This is another paragraph.
 ### This is a heading 3
 
 #### This is a heading 4
-
+ 
 ##### This is a heading 5
 
 ###### This is a heading 6
@@ -49,11 +51,15 @@ text **Bold text and *nested italic* text**
 ***Bold and italic text*** and ***Bold and italic text***
 `;
 
-  const lexer = new Lexer(source);
+  const test_str = `# #bonjour
+  # #bonsoir`;
 
   try {
-    const tokens = lexer.lex();
-    console.log(tokens);
+    const tokens = TOKENIZER.tokenize(test_str);
+    const AST = new TOKEN.Token(TOKEN.TOKEN_TYPE.ROOT, tokens);
+    console.log(TOKEN.displayToken(AST));
+
+    // for (const token of tokens) console.log(TOKEN.print(token));
   } catch (error) {
     console.log(error);
   }
