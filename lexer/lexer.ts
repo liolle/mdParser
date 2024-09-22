@@ -4,12 +4,7 @@ import { TOKENIZER } from './tokenizer';
 export type Pattern = {
   regex: () => RegExp;
   type: TOKEN.TOKEN_TYPE;
-  handler: (
-    lexer: Lexer.Lexer,
-    regex: RegExp,
-    raw_value: string,
-    nextMatch: number,
-  ) => void;
+  handler: (lexer: Lexer.Lexer, regex: RegExp, raw_value: string) => void;
 };
 
 export namespace Lexer {
@@ -30,6 +25,12 @@ export namespace Lexer {
         /((?<=[^~~]|^)~~(?=[^~~]|$))[^\n]+((?<=[^~~]|^)~~(?=[^~~]|$))/g,
       handler: wrapperHandler(TOKEN.TOKEN_TYPE.STRIKETHROUGH),
       type: TOKEN.TOKEN_TYPE.STRIKETHROUGH,
+    },
+    HIGHLIGHT: {
+      regex: () =>
+        /((?<=[^==]|^)==(?=[^==]|$))[^\n]+((?<=[^==]|^)==(?=[^==]|$))/g,
+      handler: wrapperHandler(TOKEN.TOKEN_TYPE.HIGHLIGHT),
+      type: TOKEN.TOKEN_TYPE.HIGHLIGHT,
     },
     SPACE: {
       regex: () => / /,
@@ -101,6 +102,7 @@ export namespace Lexer {
     PATTERNS.BOLD,
     PATTERNS.ITALIC,
     PATTERNS.STRIKETHROUGH,
+    PATTERNS.HIGHLIGHT,
     PATTERNS.WORD,
   ];
 
@@ -109,6 +111,7 @@ export namespace Lexer {
     PATTERNS.BOLD,
     PATTERNS.ITALIC,
     PATTERNS.STRIKETHROUGH,
+    PATTERNS.HIGHLIGHT,
     PATTERNS.WORD,
   ];
 
@@ -116,12 +119,14 @@ export namespace Lexer {
     //
     PATTERNS.ITALIC,
     PATTERNS.STRIKETHROUGH,
+    PATTERNS.HIGHLIGHT,
     PATTERNS.WORD,
   ];
   export const ITALIC_NESTED_PATTERNS: Pattern[] = [
     //
     PATTERNS.BOLD,
     PATTERNS.STRIKETHROUGH,
+    PATTERNS.HIGHLIGHT,
     PATTERNS.WORD,
   ];
 
@@ -129,6 +134,15 @@ export namespace Lexer {
     //
     PATTERNS.BOLD,
     PATTERNS.ITALIC,
+    PATTERNS.HIGHLIGHT,
+    PATTERNS.WORD,
+  ];
+
+  export const HIGHLIGHT_NESTED_PATTER: Pattern[] = [
+    //
+    PATTERNS.BOLD,
+    PATTERNS.ITALIC,
+    PATTERNS.STRIKETHROUGH,
     PATTERNS.WORD,
   ];
 
@@ -172,12 +186,7 @@ export namespace Lexer {
 }
 
 function defaultHandler(type: TOKEN.TOKEN_TYPE) {
-  return (
-    lexer: Lexer.Lexer,
-    regex: RegExp,
-    raw_value: string,
-    nextMatch: number,
-  ) => {
+  return (lexer: Lexer.Lexer, regex: RegExp, raw_value: string) => {
     lexer.push(new TOKEN.Token(type, [raw_value]));
     lexer.bump(raw_value.length);
     if (raw_value == '\n') lexer.bumpLine();
@@ -185,12 +194,7 @@ function defaultHandler(type: TOKEN.TOKEN_TYPE) {
 }
 
 function wrapperHandler(type: TOKEN.TOKEN_TYPE) {
-  return (
-    lexer: Lexer.Lexer,
-    regex: RegExp,
-    raw_value: string,
-    nextMatch: number,
-  ) => {
+  return (lexer: Lexer.Lexer, regex: RegExp, raw_value: string) => {
     let size = 1;
     let patterns: Pattern[] = [];
 
@@ -205,6 +209,11 @@ function wrapperHandler(type: TOKEN.TOKEN_TYPE) {
         patterns = Lexer.ITALIC_NESTED_PATTERNS;
         break;
       case TOKEN.TOKEN_TYPE.STRIKETHROUGH:
+        size = 2;
+        patterns = Lexer.STRIKETHROUGH_NESTED_PATTER;
+        break;
+
+      case TOKEN.TOKEN_TYPE.HIGHLIGHT:
         size = 2;
         patterns = Lexer.STRIKETHROUGH_NESTED_PATTER;
         break;
@@ -227,12 +236,7 @@ function wrapperHandler(type: TOKEN.TOKEN_TYPE) {
 }
 
 function paragraphHandler(type: TOKEN.TOKEN_TYPE, key: string) {
-  return (
-    lexer: Lexer.Lexer,
-    regex: RegExp,
-    raw_value: string,
-    nextMatch: number,
-  ) => {
+  return (lexer: Lexer.Lexer, regex: RegExp, raw_value: string) => {
     // extract body
     const body = raw_value.slice(0, raw_value.length - 1);
     const tokens: (TOKEN.Token | string)[] = [];
@@ -247,12 +251,7 @@ function paragraphHandler(type: TOKEN.TOKEN_TYPE, key: string) {
 }
 
 function headerHandler(type: TOKEN.TOKEN_TYPE, key: string) {
-  return (
-    lexer: Lexer.Lexer,
-    regex: RegExp,
-    raw_value: string,
-    nextMatch: number,
-  ) => {
+  return (lexer: Lexer.Lexer, regex: RegExp, raw_value: string) => {
     // extract body
     const body = raw_value.slice(key.length, raw_value.length - 1);
     const tokens: (TOKEN.Token | string)[] = [];

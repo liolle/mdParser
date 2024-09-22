@@ -3,6 +3,7 @@ export namespace TOKEN {
     BOLD = 'Bold',
     ITALIC = 'Italic',
     STRIKETHROUGH = 'StrikeThrough',
+    HIGHLIGHT = 'Highlight',
     H1 = 'H1',
     H2 = 'H2',
     H3 = 'H3',
@@ -56,6 +57,17 @@ export namespace TOKEN {
       }
     });
     return output;
+  }
+
+  export function tokenEquals(t1: Token, t2: Token) {
+    if (t1.type != this.type) return false;
+
+    if (t1.type == TOKEN_TYPE.WORD) return t1.value[0] == t2.value[0];
+
+    for (let i = 0; i < t1.value.length; i++) {
+      if (!tokenEquals(t1[i], t2[i])) return false;
+    }
+    return true;
   }
 
   export function oneOf(type: TOKEN_TYPE, ...types: TOKEN_TYPE[]) {
