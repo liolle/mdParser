@@ -1,98 +1,244 @@
 import { TOKEN } from './token';
 import { TOKENIZER } from './tokenizer';
 
-type Pattern = {
-  regex: RegExp;
+export type Pattern = {
+  regex: () => RegExp;
   type: TOKEN.TOKEN_TYPE;
-  handler: (lexer: Lexer, regex: RegExp, raw_value: string) => void;
+  handler: (
+    lexer: Lexer.Lexer,
+    regex: RegExp,
+    raw_value: string,
+    nextMatch: number,
+  ) => void;
 };
 
-export class Lexer {
-  private _tokens: TOKEN.Token[] = [];
-  private offset = 0;
-  private source: string;
-  private lines = 0;
-
-  private _patterns: Pattern[] = [
-    //
-    {
-      regex: /^# [^\n]+/,
-      handler: headerHandler(TOKEN.TOKEN_TYPE.H1, '# '),
-      type: TOKEN.TOKEN_TYPE.H1,
+export namespace Lexer {
+  const PATTERNS = {
+    BOLD: {
+      regex: () =>
+        /((?<=[^\*]|^)\*{2}(?=[^\*]|$))[^\n]+((?<=[^\*]|^)\*{2}(?=[^\*]|$))/g,
+      handler: boldHandler(TOKEN.TOKEN_TYPE.BOLD, '**'),
+      type: TOKEN.TOKEN_TYPE.BOLD,
     },
-    {
-      regex: /\n/,
-      handler: defaultHandler(TOKEN.TOKEN_TYPE.NEW_LINE),
-      type: TOKEN.TOKEN_TYPE.NEW_LINE,
-    },
-    {
-      regex: / /,
+    SPACE: {
+      regex: () => / /,
       handler: defaultHandler(TOKEN.TOKEN_TYPE.SPACE),
       type: TOKEN.TOKEN_TYPE.SPACE,
     },
-    {
-      regex: /[^\n]+/,
+    WORD: {
+      regex: () => /[^\n]+/,
       handler: defaultHandler(TOKEN.TOKEN_TYPE.WORD),
       type: TOKEN.TOKEN_TYPE.WORD,
     },
+    H6: {
+      regex: () => /^###### [^\n]+\n?/,
+      handler: headerHandler(TOKEN.TOKEN_TYPE.H6, '###### '),
+      type: TOKEN.TOKEN_TYPE.H6,
+    },
+    H5: {
+      regex: () => /^##### [^\n]+\n?/,
+      handler: headerHandler(TOKEN.TOKEN_TYPE.H5, '##### '),
+      type: TOKEN.TOKEN_TYPE.H5,
+    },
+    H4: {
+      regex: () => /^#### [^\n]+\n?/,
+      handler: headerHandler(TOKEN.TOKEN_TYPE.H4, '#### '),
+      type: TOKEN.TOKEN_TYPE.H4,
+    },
+    H3: {
+      regex: () => /^### [^\n]+\n?/,
+      handler: headerHandler(TOKEN.TOKEN_TYPE.H3, '### '),
+      type: TOKEN.TOKEN_TYPE.H3,
+    },
+    H2: {
+      regex: () => /^## [^\n]+\n?/,
+      handler: headerHandler(TOKEN.TOKEN_TYPE.H2, '## '),
+      type: TOKEN.TOKEN_TYPE.H2,
+    },
+
+    H1: {
+      regex: () => /^# [^\n]+\n?/,
+      handler: headerHandler(TOKEN.TOKEN_TYPE.H1, '# '),
+      type: TOKEN.TOKEN_TYPE.H1,
+    },
+    NEW_LINE: {
+      regex: () => /\n/,
+      handler: defaultHandler(TOKEN.TOKEN_TYPE.NEW_LINE),
+      type: TOKEN.TOKEN_TYPE.NEW_LINE,
+    },
+    PARAGRAPH: {
+      regex: () => /[^\n]+\n/,
+      handler: paragraphHandler(TOKEN.TOKEN_TYPE.PARAGRAPH, ''),
+      type: TOKEN.TOKEN_TYPE.PARAGRAPH,
+    },
+  };
+  export const ALL_PATTERNS: Pattern[] = [
+    //
+    PATTERNS.BOLD,
+    PATTERNS.H6,
+    PATTERNS.H5,
+    PATTERNS.H4,
+    PATTERNS.H3,
+    PATTERNS.H2,
+    PATTERNS.H1,
+    PATTERNS.NEW_LINE,
+    PATTERNS.PARAGRAPH,
+    PATTERNS.SPACE,
+    PATTERNS.WORD,
+  ];
+  export const PARAGRAPH_NESTED_PATTERNS: Pattern[] = [
+    //
+    PATTERNS.BOLD,
+    PATTERNS.WORD,
   ];
 
-  constructor(source: string) {
-    this.source = source;
-  }
+  export const HEADER_NESTED_PATTERNS: Pattern[] = [
+    //
+    PATTERNS.BOLD,
+    PATTERNS.WORD,
+  ];
 
-  push(token: TOKEN.Token) {
-    this._tokens.push(token);
-  }
+  export class Lexer {
+    private _tokens: TOKEN.Token[] = [];
+    private offset = 0;
+    private source: string;
+    private lines = 0;
 
-  bump(len: number) {
-    this.offset += len;
-  }
+    constructor(source: string) {
+      this.source = source;
+    }
 
-  bumpLine() {
-    this.lines++;
-  }
+    push(token: TOKEN.Token) {
+      this._tokens.push(token);
+    }
 
-  remainder() {
-    return this.source.slice(this.offset);
-  }
+    bump(len: number) {
+      this.offset += len;
+    }
 
-  //
-  eof() {
-    return this.source.length <= this.offset;
-  }
+    bumpLine() {
+      this.lines++;
+    }
 
-  get tokens() {
-    return this._tokens;
-  }
-  get isFirstLineCharacter() {
-    return this.offset == 0 || this.source.charAt(this.offset - 1) == '\n';
-  }
+    remainder() {
+      return this.source.slice(this.offset);
+    }
 
-  get patterns() {
-    return this._patterns;
-  }
+    eof() {
+      return this.source.length <= this.offset;
+    }
 
-  #group_words() {}
+    get tokens() {
+      return this._tokens;
+    }
+    get isFirstLineCharacter() {
+      return this.offset == 0 || this.source.charAt(this.offset - 1) == '\n';
+    }
+  }
 }
 
 function defaultHandler(type: TOKEN.TOKEN_TYPE) {
-  return (lexer: Lexer, regex: RegExp, raw_value: string) => {
+  return (
+    lexer: Lexer.Lexer,
+    regex: RegExp,
+    raw_value: string,
+    nextMatch: number,
+  ) => {
     lexer.push(new TOKEN.Token(type, [raw_value]));
-    if (raw_value == '\n') lexer.bumpLine();
-
     lexer.bump(raw_value.length);
+    if (raw_value == '\n') lexer.bumpLine();
+  };
+}
+
+function boldHandler(type: TOKEN.TOKEN_TYPE, key: string) {
+  return (
+    lexer: Lexer.Lexer,
+    regex: RegExp,
+    raw_value: string,
+    nextMatch: number,
+  ) => {
+    // extract body
+    const body = raw_value.slice(2, raw_value.length - 2);
+
+    lexer.push(new TOKEN.Token(type, TOKENIZER.tokenize(body)));
+    lexer.bump(raw_value.length);
+
+    return true;
+  };
+}
+
+function paragraphHandler(type: TOKEN.TOKEN_TYPE, key: string) {
+  return (
+    lexer: Lexer.Lexer,
+    regex: RegExp,
+    raw_value: string,
+    nextMatch: number,
+  ) => {
+    // extract body
+    const body = raw_value.slice(0, raw_value.length - 1);
+    const tokens: (TOKEN.Token | string)[] = [];
+
+    let next_idx = Infinity;
+
+    for (const pattern of Lexer.PARAGRAPH_NESTED_PATTERNS) {
+      const exec_res = pattern.regex().exec(body);
+      if (!exec_res) continue;
+      if (exec_res['index'] != 0) {
+        next_idx = Math.min(next_idx, exec_res['index']);
+      }
+    }
+
+    if (next_idx != Infinity) {
+      const word = body.slice(0, next_idx);
+      tokens.push(new TOKEN.Token(TOKEN.TOKEN_TYPE.WORD, [word]));
+      tokens.push(
+        ...TOKENIZER.tokenize(body.slice(next_idx), {
+          patterns: Lexer.PARAGRAPH_NESTED_PATTERNS,
+        }),
+      );
+    }
+
+    lexer.push(new TOKEN.Token(type, tokens));
+    lexer.bump(raw_value.length);
+
+    return true;
   };
 }
 
 function headerHandler(type: TOKEN.TOKEN_TYPE, key: string) {
-  return (lexer: Lexer, regex: RegExp, raw_value: string) => {
-    if (!lexer.isFirstLineCharacter) return false;
-
+  return (
+    lexer: Lexer.Lexer,
+    regex: RegExp,
+    raw_value: string,
+    nextMatch: number,
+  ) => {
     // extract body
-    const body = raw_value.slice(key.length);
+    const body = raw_value.slice(key.length, raw_value.length - 1);
+    const tokens: (TOKEN.Token | string)[] = [];
 
-    lexer.push(new TOKEN.Token(type, TOKENIZER.tokenize(body)));
+    let next_idx = Infinity;
+
+    for (const pattern of Lexer.HEADER_NESTED_PATTERNS) {
+      const exec_res = pattern.regex().exec(body);
+      if (!exec_res) continue;
+      if (exec_res['index'] != 0) {
+        next_idx = Math.min(next_idx, exec_res['index']);
+      }
+    }
+
+    if (next_idx != Infinity) {
+      const word = body.slice(0, next_idx);
+      tokens.push(new TOKEN.Token(TOKEN.TOKEN_TYPE.WORD, [word]));
+      tokens.push(
+        ...TOKENIZER.tokenize(body.slice(next_idx), {
+          patterns: Lexer.HEADER_NESTED_PATTERNS,
+        }),
+      );
+    } else {
+      tokens.push(new TOKEN.Token(TOKEN.TOKEN_TYPE.WORD, [body]));
+    }
+
+    lexer.push(new TOKEN.Token(type, tokens));
     lexer.bump(raw_value.length);
 
     return true;
