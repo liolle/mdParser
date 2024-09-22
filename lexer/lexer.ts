@@ -25,6 +25,12 @@ export namespace Lexer {
       handler: wrapperHandler(TOKEN.TOKEN_TYPE.ITALIC),
       type: TOKEN.TOKEN_TYPE.ITALIC,
     },
+    STRIKETHROUGH: {
+      regex: () =>
+        /((?<=[^~~]|^)~~(?=[^~~]|$))[^\n]+((?<=[^~~]|^)~~(?=[^~~]|$))/g,
+      handler: wrapperHandler(TOKEN.TOKEN_TYPE.STRIKETHROUGH),
+      type: TOKEN.TOKEN_TYPE.STRIKETHROUGH,
+    },
     SPACE: {
       regex: () => / /,
       handler: defaultHandler(TOKEN.TOKEN_TYPE.SPACE),
@@ -79,7 +85,6 @@ export namespace Lexer {
   };
   export const ALL_PATTERNS: Pattern[] = [
     //
-    // PATTERNS.BOLD,
     PATTERNS.H6,
     PATTERNS.H5,
     PATTERNS.H4,
@@ -95,6 +100,7 @@ export namespace Lexer {
     //
     PATTERNS.BOLD,
     PATTERNS.ITALIC,
+    PATTERNS.STRIKETHROUGH,
     PATTERNS.WORD,
   ];
 
@@ -102,16 +108,27 @@ export namespace Lexer {
     //
     PATTERNS.BOLD,
     PATTERNS.ITALIC,
+    PATTERNS.STRIKETHROUGH,
     PATTERNS.WORD,
   ];
 
   export const BOLD_NESTED_PATTERNS: Pattern[] = [
     //
     PATTERNS.ITALIC,
+    PATTERNS.STRIKETHROUGH,
     PATTERNS.WORD,
   ];
-  export const Italic_NESTED_PATTERNS: Pattern[] = [
+  export const ITALIC_NESTED_PATTERNS: Pattern[] = [
     //
+    PATTERNS.BOLD,
+    PATTERNS.STRIKETHROUGH,
+    PATTERNS.WORD,
+  ];
+
+  export const STRIKETHROUGH_NESTED_PATTER: Pattern[] = [
+    //
+    PATTERNS.BOLD,
+    PATTERNS.ITALIC,
     PATTERNS.WORD,
   ];
 
@@ -185,7 +202,11 @@ function wrapperHandler(type: TOKEN.TOKEN_TYPE) {
 
       case TOKEN.TOKEN_TYPE.ITALIC:
         size = 1;
-        patterns = Lexer.Italic_NESTED_PATTERNS;
+        patterns = Lexer.ITALIC_NESTED_PATTERNS;
+        break;
+      case TOKEN.TOKEN_TYPE.STRIKETHROUGH:
+        size = 2;
+        patterns = Lexer.STRIKETHROUGH_NESTED_PATTER;
         break;
 
       default:
@@ -195,34 +216,8 @@ function wrapperHandler(type: TOKEN.TOKEN_TYPE) {
     // extract body
     const body = raw_value.slice(size, raw_value.length - size);
     const tokens: (TOKEN.Token | string)[] = [];
-    let next_idx = Infinity;
 
-    for (const pattern of patterns) {
-      const exec_res = pattern.regex().exec(body);
-      if (!exec_res) continue;
-      if (
-        exec_res['index'] != 0 ||
-        (pattern.type != type && pattern.type != TOKEN.TOKEN_TYPE.WORD)
-      ) {
-        next_idx = Math.min(next_idx, exec_res['index']);
-      }
-    }
-
-    // console.log('->', body, next_idx, type);
-
-    if (next_idx != Infinity) {
-      const word = body.slice(0, next_idx);
-      if (word.length > 0) {
-        tokens.push(new TOKEN.Token(TOKEN.TOKEN_TYPE.WORD, [word]));
-      }
-      tokens.push(
-        ...TOKENIZER.tokenize(body.slice(next_idx), {
-          patterns: patterns,
-        }),
-      );
-    } else {
-      tokens.push(new TOKEN.Token(TOKEN.TOKEN_TYPE.WORD, [body]));
-    }
+    nestedSearch(Lexer.PARAGRAPH_NESTED_PATTERNS, body, type, tokens);
 
     lexer.push(new TOKEN.Token(type, tokens));
     lexer.bump(raw_value.length);
@@ -242,32 +237,7 @@ function paragraphHandler(type: TOKEN.TOKEN_TYPE, key: string) {
     const body = raw_value.slice(0, raw_value.length - 1);
     const tokens: (TOKEN.Token | string)[] = [];
 
-    let next_idx = Infinity;
-
-    for (const pattern of Lexer.PARAGRAPH_NESTED_PATTERNS) {
-      const exec_res = pattern.regex().exec(body);
-      if (!exec_res) continue;
-      if (
-        exec_res['index'] != 0 ||
-        (pattern.type != type && pattern.type != TOKEN.TOKEN_TYPE.WORD)
-      ) {
-        next_idx = Math.min(next_idx, exec_res['index']);
-      }
-    }
-
-    if (next_idx != Infinity) {
-      const word = body.slice(0, next_idx);
-      if (word.length > 0) {
-        tokens.push(new TOKEN.Token(TOKEN.TOKEN_TYPE.WORD, [word]));
-      }
-      tokens.push(
-        ...TOKENIZER.tokenize(body.slice(next_idx), {
-          patterns: Lexer.PARAGRAPH_NESTED_PATTERNS,
-        }),
-      );
-    } else {
-      tokens.push(new TOKEN.Token(TOKEN.TOKEN_TYPE.WORD, [body]));
-    }
+    nestedSearch(Lexer.PARAGRAPH_NESTED_PATTERNS, body, type, tokens);
 
     lexer.push(new TOKEN.Token(type, tokens));
     lexer.bump(raw_value.length);
@@ -287,36 +257,45 @@ function headerHandler(type: TOKEN.TOKEN_TYPE, key: string) {
     const body = raw_value.slice(key.length, raw_value.length - 1);
     const tokens: (TOKEN.Token | string)[] = [];
 
-    let next_idx = Infinity;
-
-    for (const pattern of Lexer.HEADER_NESTED_PATTERNS) {
-      const exec_res = pattern.regex().exec(body);
-      if (!exec_res) continue;
-      if (
-        exec_res['index'] != 0 ||
-        (pattern.type != type && pattern.type != TOKEN.TOKEN_TYPE.WORD)
-      ) {
-        next_idx = Math.min(next_idx, exec_res['index']);
-      }
-    }
-
-    if (next_idx != Infinity) {
-      const word = body.slice(0, next_idx);
-      if (word.length > 0) {
-        tokens.push(new TOKEN.Token(TOKEN.TOKEN_TYPE.WORD, [word]));
-      }
-      tokens.push(
-        ...TOKENIZER.tokenize(body.slice(next_idx), {
-          patterns: Lexer.HEADER_NESTED_PATTERNS,
-        }),
-      );
-    } else {
-      tokens.push(new TOKEN.Token(TOKEN.TOKEN_TYPE.WORD, [body]));
-    }
+    nestedSearch(Lexer.HEADER_NESTED_PATTERNS, body, type, tokens);
 
     lexer.push(new TOKEN.Token(type, tokens));
     lexer.bump(raw_value.length);
 
     return true;
   };
+}
+
+function nestedSearch(
+  patterns: Pattern[],
+  body: string,
+  type: TOKEN.TOKEN_TYPE,
+  tokens: (TOKEN.Token | string)[],
+) {
+  let next_idx = Infinity;
+
+  for (const pattern of patterns) {
+    const exec_res = pattern.regex().exec(body);
+    if (!exec_res) continue;
+    if (
+      exec_res['index'] != 0 ||
+      (pattern.type != type && pattern.type != TOKEN.TOKEN_TYPE.WORD)
+    ) {
+      next_idx = Math.min(next_idx, exec_res['index']);
+    }
+  }
+
+  if (next_idx != Infinity) {
+    const word = body.slice(0, next_idx);
+    if (word.length > 0) {
+      tokens.push(new TOKEN.Token(TOKEN.TOKEN_TYPE.WORD, [word]));
+    }
+    tokens.push(
+      ...TOKENIZER.tokenize(body.slice(next_idx), {
+        patterns: patterns,
+      }),
+    );
+  } else {
+    tokens.push(new TOKEN.Token(TOKEN.TOKEN_TYPE.WORD, [body]));
+  }
 }
