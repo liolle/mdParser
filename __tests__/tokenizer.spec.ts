@@ -254,6 +254,23 @@ describe('Parsing', () => {
         TOKEN.displayToken(expected_token),
       );
     });
+
+    test('Header External_link', () => {
+      const tokens = TOKENIZER.tokenize(
+        `## Link in header ![Crafty](${CONSTANT.SampleImage1})`,
+      );
+      const expected_token = new TOKEN.Token(TOKEN.TOKEN_TYPE.H2, [
+        new TOKEN.Token(TOKEN.TOKEN_TYPE.WORD, [`Link in header `]),
+        new TOKEN.LinkToken(
+          `${CONSTANT.SampleImage1}`,
+          [new TOKEN.Token(TOKEN.TOKEN_TYPE.WORD, [`Crafty`])],
+          TOKEN.LINK_TOKEN_TYPE.IMAGE,
+        ),
+      ]);
+
+      expect(tokens).toHaveLength(1);
+      expect(tokens[0].print()).toEqual(expected_token.print());
+    });
   });
 
   suite('Links', () => {

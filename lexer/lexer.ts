@@ -89,7 +89,7 @@ export namespace Lexer {
       type: TOKEN.TOKEN_TYPE.PARAGRAPH,
     },
     EXTERNAL_LINK: {
-      regex: () => /!?\[[^\n]*\]([^\n]+)\n?/,
+      regex: () => /!?\[[^\n]*\]\([^\n]*\)\n?/,
       handler: externalLinkHandler(TOKEN.TOKEN_TYPE.EXTERNAL_LINK),
       type: TOKEN.TOKEN_TYPE.EXTERNAL_LINK,
     },
@@ -115,6 +115,7 @@ export namespace Lexer {
   ];
   export const PARAGRAPH_NESTED_PATTERNS: Pattern[] = [
     //
+    PATTERNS.EXTERNAL_LINK,
     PATTERNS.BOLD,
     PATTERNS.ITALIC,
     PATTERNS.STRIKETHROUGH,
@@ -124,6 +125,7 @@ export namespace Lexer {
 
   export const HEADER_NESTED_PATTERNS: Pattern[] = [
     //
+    PATTERNS.EXTERNAL_LINK,
     PATTERNS.BOLD,
     PATTERNS.ITALIC,
     PATTERNS.STRIKETHROUGH,
@@ -133,6 +135,7 @@ export namespace Lexer {
 
   export const BOLD_NESTED_PATTERNS: Pattern[] = [
     //
+    PATTERNS.EXTERNAL_LINK,
     PATTERNS.ITALIC,
     PATTERNS.STRIKETHROUGH,
     PATTERNS.HIGHLIGHT,
@@ -140,6 +143,7 @@ export namespace Lexer {
   ];
   export const ITALIC_NESTED_PATTERNS: Pattern[] = [
     //
+    PATTERNS.EXTERNAL_LINK,
     PATTERNS.BOLD,
     PATTERNS.STRIKETHROUGH,
     PATTERNS.HIGHLIGHT,
@@ -148,6 +152,7 @@ export namespace Lexer {
 
   export const STRIKETHROUGH_NESTED_PATTER: Pattern[] = [
     //
+    PATTERNS.EXTERNAL_LINK,
     PATTERNS.BOLD,
     PATTERNS.ITALIC,
     PATTERNS.HIGHLIGHT,
@@ -156,6 +161,7 @@ export namespace Lexer {
 
   export const HIGHLIGHT_NESTED_PATTER: Pattern[] = [
     //
+    PATTERNS.EXTERNAL_LINK,
     PATTERNS.BOLD,
     PATTERNS.ITALIC,
     PATTERNS.STRIKETHROUGH,
@@ -174,6 +180,7 @@ export namespace Lexer {
   export const WORD_NESTED_PATTER: Pattern[] = [
     //
     PATTERNS.ESCAPE,
+    PATTERNS.EXTERNAL_LINK,
     PATTERNS.WORD,
   ];
 
@@ -228,6 +235,8 @@ function defaultHandler(type: TOKEN.TOKEN_TYPE) {
 function wordHandler(type: TOKEN.TOKEN_TYPE) {
   return (lexer: Lexer.Lexer, regex: RegExp, raw_value: string) => {
     const tokens: (TOKEN.Token | string)[] = [];
+
+    console.log(raw_value);
 
     nestedSearch(Lexer.WORD_NESTED_PATTER, raw_value, type, tokens);
 
