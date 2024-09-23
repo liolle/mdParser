@@ -88,11 +88,17 @@ export namespace Lexer {
       handler: paragraphHandler(TOKEN.TOKEN_TYPE.PARAGRAPH, ''),
       type: TOKEN.TOKEN_TYPE.PARAGRAPH,
     },
+    EXTERNAL_LINK: {
+      regex: () => /!?\[[^\n]*\]([^\n]+)\n?/,
+      handler: externalLinkHandler(TOKEN.TOKEN_TYPE.EXTERNAL_LINK),
+      type: TOKEN.TOKEN_TYPE.EXTERNAL_LINK,
+    },
   };
   export const ALL_PATTERNS: Pattern[] = [
     //
     PATTERNS.ESCAPE,
     PATTERNS.NEW_LINE,
+    PATTERNS.EXTERNAL_LINK,
     PATTERNS.H6,
     PATTERNS.H5,
     PATTERNS.H4,
@@ -156,10 +162,14 @@ export namespace Lexer {
     PATTERNS.WORD,
   ];
 
-  // export const ESCAPE_NESTED_PATTER: Pattern[] = [
-  //   //
-  //   PATTERNS.WORD,
-  // ];
+  export const EXTERNAL_LINK_NESTED_PATTER: Pattern[] = [
+    //
+    PATTERNS.BOLD,
+    PATTERNS.ITALIC,
+    PATTERNS.STRIKETHROUGH,
+    PATTERNS.HIGHLIGHT,
+    PATTERNS.WORD,
+  ];
 
   export const WORD_NESTED_PATTER: Pattern[] = [
     //
@@ -222,6 +232,56 @@ function wordHandler(type: TOKEN.TOKEN_TYPE) {
     nestedSearch(Lexer.WORD_NESTED_PATTER, raw_value, type, tokens);
 
     lexer.push(new TOKEN.Token(type, tokens));
+    lexer.bump(raw_value.length);
+  };
+}
+
+function externalLinkHandler(type: TOKEN.TOKEN_TYPE) {
+  return (lexer: Lexer.Lexer, regex: RegExp, raw_value: string) => {
+    const tokens: (TOKEN.Token | string)[] = [];
+    let offset = 1;
+    if (raw_value[0] == '!') offset++;
+
+    const [name, url] = raw_value
+      .slice(offset, raw_value.length - 1)
+      .split('](');
+
+    let next_idx = Infinity;
+
+    for (const pattern of Lexer.EXTERNAL_LINK_NESTED_PATTER) {
+      const exec_res = pattern.regex().exec(name);
+      if (!exec_res) continue;
+      if (
+        exec_res['index'] != 0 ||
+        (pattern.type != type && pattern.type != TOKEN.TOKEN_TYPE.WORD)
+      ) {
+        next_idx = Math.min(next_idx, exec_res['index']);
+      }
+    }
+
+    if (next_idx != Infinity) {
+      const word = name.slice(0, next_idx);
+      if (word.length > 0) {
+        tokens.push(new TOKEN.Token(TOKEN.TOKEN_TYPE.WORD, [word]));
+      }
+      tokens.push(
+        ...TOKENIZER.tokenize(name.slice(next_idx), {
+          patterns: Lexer.EXTERNAL_LINK_NESTED_PATTER,
+        }),
+      );
+    } else if (name && name != '') {
+      tokens.push(new TOKEN.Token(TOKEN.TOKEN_TYPE.WORD, [name]));
+    }
+
+    lexer.push(
+      new TOKEN.LinkToken(
+        url,
+        tokens,
+        offset == 2
+          ? TOKEN.LINK_TOKEN_TYPE.IMAGE
+          : TOKEN.LINK_TOKEN_TYPE.DEFAULT,
+      ),
+    );
     lexer.bump(raw_value.length);
   };
 }

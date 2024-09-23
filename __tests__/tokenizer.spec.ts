@@ -191,5 +191,196 @@ describe('Parsing', () => {
     });
   });
 
-  suite('nested', () => {});
+  suite('Nested', () => {
+    test('Italic in Bold', () => {
+      const tokens = TOKENIZER.tokenize(
+        '**Bold text and _nested italic_ text**',
+      );
+
+      const expected_token = new TOKEN.Token(TOKEN.TOKEN_TYPE.BOLD, [
+        new TOKEN.Token(TOKEN.TOKEN_TYPE.WORD, ['Bold text and ']),
+        new TOKEN.Token(TOKEN.TOKEN_TYPE.ITALIC, [
+          new TOKEN.Token(TOKEN.TOKEN_TYPE.WORD, ['nested italic']),
+        ]),
+        new TOKEN.Token(TOKEN.TOKEN_TYPE.WORD, [' text']),
+      ]);
+
+      expect(tokens).toHaveLength(1);
+      expect(TOKEN.displayToken(tokens[0])).toEqual(
+        TOKEN.displayToken(expected_token),
+      );
+    });
+
+    test('Bold in Italic', () => {
+      const tokens = TOKENIZER.tokenize(
+        '_Italic text and **nested Bold** text_',
+      );
+
+      const expected_token = new TOKEN.Token(TOKEN.TOKEN_TYPE.ITALIC, [
+        new TOKEN.Token(TOKEN.TOKEN_TYPE.WORD, ['Italic text and ']),
+        new TOKEN.Token(TOKEN.TOKEN_TYPE.BOLD, [
+          new TOKEN.Token(TOKEN.TOKEN_TYPE.WORD, ['nested Bold']),
+        ]),
+        new TOKEN.Token(TOKEN.TOKEN_TYPE.WORD, [' text']),
+      ]);
+
+      expect(tokens).toHaveLength(1);
+      expect(TOKEN.displayToken(tokens[0])).toEqual(
+        TOKEN.displayToken(expected_token),
+      );
+    });
+
+    test('Nested in header', () => {
+      const tokens = TOKENIZER.tokenize(
+        '### ~~**Bold text and _nested italic_ text in heading and strike**~~',
+      );
+
+      const expected_token = new TOKEN.Token(TOKEN.TOKEN_TYPE.H3, [
+        new TOKEN.Token(TOKEN.TOKEN_TYPE.STRIKETHROUGH, [
+          new TOKEN.Token(TOKEN.TOKEN_TYPE.BOLD, [
+            new TOKEN.Token(TOKEN.TOKEN_TYPE.WORD, ['Bold text and ']),
+            new TOKEN.Token(TOKEN.TOKEN_TYPE.ITALIC, [
+              new TOKEN.Token(TOKEN.TOKEN_TYPE.WORD, ['nested italic']),
+            ]),
+            new TOKEN.Token(TOKEN.TOKEN_TYPE.WORD, [
+              ' text in heading and strike',
+            ]),
+          ]),
+        ]),
+      ]);
+
+      expect(tokens).toHaveLength(1);
+      expect(TOKEN.displayToken(tokens[0])).toEqual(
+        TOKEN.displayToken(expected_token),
+      );
+    });
+  });
+
+  suite('Links', () => {
+    test('External link (no name)', () => {
+      const tokens = TOKENIZER.tokenize('[](https://github.com/liolle/Crafty)');
+      const expected_token = new TOKEN.LinkToken(
+        'https://github.com/liolle/Crafty',
+        [],
+      );
+
+      expect(tokens).toHaveLength(1);
+      expect(tokens[0]).toBeInstanceOf(TOKEN.LinkToken);
+      expect((tokens[0] as TOKEN.LinkToken).kind).toEqual(
+        TOKEN.LINK_TOKEN_TYPE.DEFAULT,
+      );
+      expect(tokens[0].print()).toEqual(expected_token.print());
+    });
+    test('External link (no url)', () => {
+      const tokens = TOKENIZER.tokenize('[Crafty]()');
+      const expected_token = new TOKEN.LinkToken('', [
+        new TOKEN.Token(TOKEN.TOKEN_TYPE.WORD, [`Crafty`]),
+      ]);
+
+      expect(tokens).toHaveLength(1);
+      expect(tokens[0]).toBeInstanceOf(TOKEN.LinkToken);
+      expect((tokens[0] as TOKEN.LinkToken).kind).toEqual(
+        TOKEN.LINK_TOKEN_TYPE.DEFAULT,
+      );
+      expect(tokens[0].print()).toEqual(expected_token.print());
+    });
+
+    test('External link', () => {
+      const tokens = TOKENIZER.tokenize(
+        '[Crafty](https://github.com/liolle/Crafty)',
+      );
+      const expected_token = new TOKEN.LinkToken(
+        'https://github.com/liolle/Crafty',
+        [new TOKEN.Token(TOKEN.TOKEN_TYPE.WORD, [`Crafty`])],
+      );
+
+      expect(tokens).toHaveLength(1);
+      expect(tokens[0]).toBeInstanceOf(TOKEN.LinkToken);
+      expect((tokens[0] as TOKEN.LinkToken).kind).toEqual(
+        TOKEN.LINK_TOKEN_TYPE.DEFAULT,
+      );
+      expect(tokens[0].print()).toEqual(expected_token.print());
+    });
+
+    test('External link (no name & no url)', () => {
+      const tokens = TOKENIZER.tokenize('[]()');
+      const expected_token = new TOKEN.LinkToken(
+        '',
+        [],
+        TOKEN.LINK_TOKEN_TYPE.IMAGE,
+      );
+
+      expect(tokens).toHaveLength(1);
+      expect(tokens[0]).toBeInstanceOf(TOKEN.LinkToken);
+      expect((tokens[0] as TOKEN.LinkToken).kind).toEqual(
+        TOKEN.LINK_TOKEN_TYPE.DEFAULT,
+      );
+      expect(tokens[0].print()).toEqual(expected_token.print());
+    });
+
+    // Images
+
+    test('External image (no name)', () => {
+      const tokens = TOKENIZER.tokenize(`![](${CONSTANT.SampleImage1})`);
+      const expected_token = new TOKEN.LinkToken(
+        String.raw`${CONSTANT.SampleImage1}`,
+        [],
+        TOKEN.LINK_TOKEN_TYPE.IMAGE,
+      );
+
+      expect(tokens).toHaveLength(1);
+      expect(tokens[0]).toBeInstanceOf(TOKEN.LinkToken);
+      expect((tokens[0] as TOKEN.LinkToken).kind).toEqual(
+        TOKEN.LINK_TOKEN_TYPE.IMAGE,
+      );
+      expect(tokens[0].print()).toEqual(expected_token.print());
+    });
+
+    test('External image (no url)', () => {
+      const tokens = TOKENIZER.tokenize('![Crafty]()');
+      const expected_token = new TOKEN.LinkToken('', [
+        new TOKEN.Token(TOKEN.TOKEN_TYPE.WORD, [`Crafty`]),
+        TOKEN.LINK_TOKEN_TYPE.IMAGE,
+      ]);
+
+      expect(tokens).toHaveLength(1);
+      expect(tokens[0]).toBeInstanceOf(TOKEN.LinkToken);
+      expect((tokens[0] as TOKEN.LinkToken).kind).toEqual(
+        TOKEN.LINK_TOKEN_TYPE.IMAGE,
+      );
+      expect(tokens[0].print()).toEqual(expected_token.print());
+    });
+
+    test('External image', () => {
+      const tokens = TOKENIZER.tokenize(`![Crafty](${CONSTANT.SampleImage1})`);
+      const expected_token = new TOKEN.LinkToken(
+        String.raw`${CONSTANT.SampleImage1}`,
+        [new TOKEN.Token(TOKEN.TOKEN_TYPE.WORD, [`Crafty`])],
+        TOKEN.LINK_TOKEN_TYPE.IMAGE,
+      );
+
+      expect(tokens).toHaveLength(1);
+      expect(tokens[0]).toBeInstanceOf(TOKEN.LinkToken);
+      expect((tokens[0] as TOKEN.LinkToken).kind).toEqual(
+        TOKEN.LINK_TOKEN_TYPE.IMAGE,
+      );
+      expect(tokens[0].print()).toEqual(expected_token.print());
+    });
+
+    test('External image (no name & no url)', () => {
+      const tokens = TOKENIZER.tokenize('![]()');
+      const expected_token = new TOKEN.LinkToken(
+        '',
+        [],
+        TOKEN.LINK_TOKEN_TYPE.IMAGE,
+      );
+
+      expect(tokens).toHaveLength(1);
+      expect(tokens[0]).toBeInstanceOf(TOKEN.LinkToken);
+      expect((tokens[0] as TOKEN.LinkToken).kind).toEqual(
+        TOKEN.LINK_TOKEN_TYPE.IMAGE,
+      );
+      expect(tokens[0].print()).toEqual(expected_token.print());
+    });
+  });
 });
