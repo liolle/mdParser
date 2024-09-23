@@ -38,8 +38,8 @@ export namespace Lexer {
       type: TOKEN.TOKEN_TYPE.SPACE,
     },
     WORD: {
-      regex: () => /[^\n]+/,
-      handler: defaultHandler(TOKEN.TOKEN_TYPE.WORD),
+      regex: () => /[^\n\\]+/,
+      handler: wordHandler(TOKEN.TOKEN_TYPE.WORD),
       type: TOKEN.TOKEN_TYPE.WORD,
     },
     H6: {
@@ -78,6 +78,11 @@ export namespace Lexer {
       handler: defaultHandler(TOKEN.TOKEN_TYPE.NEW_LINE),
       type: TOKEN.TOKEN_TYPE.NEW_LINE,
     },
+    ESCAPE: {
+      regex: () => /\\./,
+      handler: escapeHandler(TOKEN.TOKEN_TYPE.ESCAPE),
+      type: TOKEN.TOKEN_TYPE.ESCAPE,
+    },
     PARAGRAPH: {
       regex: () => /[^\n]+\n/,
       handler: paragraphHandler(TOKEN.TOKEN_TYPE.PARAGRAPH, ''),
@@ -86,14 +91,19 @@ export namespace Lexer {
   };
   export const ALL_PATTERNS: Pattern[] = [
     //
+    PATTERNS.ESCAPE,
+    PATTERNS.NEW_LINE,
     PATTERNS.H6,
     PATTERNS.H5,
     PATTERNS.H4,
     PATTERNS.H3,
     PATTERNS.H2,
     PATTERNS.H1,
-    PATTERNS.NEW_LINE,
     PATTERNS.PARAGRAPH,
+    PATTERNS.BOLD,
+    PATTERNS.ITALIC,
+    PATTERNS.STRIKETHROUGH,
+    PATTERNS.HIGHLIGHT,
     PATTERNS.SPACE,
     PATTERNS.WORD,
   ];
@@ -146,6 +156,17 @@ export namespace Lexer {
     PATTERNS.WORD,
   ];
 
+  // export const ESCAPE_NESTED_PATTER: Pattern[] = [
+  //   //
+  //   PATTERNS.WORD,
+  // ];
+
+  export const WORD_NESTED_PATTER: Pattern[] = [
+    //
+    PATTERNS.ESCAPE,
+    PATTERNS.WORD,
+  ];
+
   export class Lexer {
     private _tokens: TOKEN.Token[] = [];
     private offset = 0;
@@ -189,7 +210,28 @@ function defaultHandler(type: TOKEN.TOKEN_TYPE) {
   return (lexer: Lexer.Lexer, regex: RegExp, raw_value: string) => {
     lexer.push(new TOKEN.Token(type, [raw_value]));
     lexer.bump(raw_value.length);
+
     if (raw_value == '\n') lexer.bumpLine();
+  };
+}
+
+function wordHandler(type: TOKEN.TOKEN_TYPE) {
+  return (lexer: Lexer.Lexer, regex: RegExp, raw_value: string) => {
+    const tokens: (TOKEN.Token | string)[] = [];
+
+    nestedSearch(Lexer.WORD_NESTED_PATTER, raw_value, type, tokens);
+
+    lexer.push(new TOKEN.Token(type, tokens));
+    lexer.bump(raw_value.length);
+  };
+}
+
+function escapeHandler(type: TOKEN.TOKEN_TYPE) {
+  return (lexer: Lexer.Lexer, regex: RegExp, raw_value: string) => {
+    const body = raw_value.slice(1);
+
+    lexer.push(new TOKEN.Token(type, [body]));
+    lexer.bump(raw_value.length);
   };
 }
 
@@ -226,7 +268,7 @@ function wrapperHandler(type: TOKEN.TOKEN_TYPE) {
     const body = raw_value.slice(size, raw_value.length - size);
     const tokens: (TOKEN.Token | string)[] = [];
 
-    nestedSearch(Lexer.PARAGRAPH_NESTED_PATTERNS, body, type, tokens);
+    nestedSearch(patterns, body, type, tokens);
 
     lexer.push(new TOKEN.Token(type, tokens));
     lexer.bump(raw_value.length);
@@ -298,6 +340,8 @@ function nestedSearch(
       }),
     );
   } else {
-    tokens.push(new TOKEN.Token(TOKEN.TOKEN_TYPE.WORD, [body]));
+    if (type != TOKEN.TOKEN_TYPE.WORD)
+      tokens.push(new TOKEN.Token(TOKEN.TOKEN_TYPE.WORD, [body]));
+    else tokens.push(body);
   }
 }

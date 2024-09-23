@@ -16,6 +16,7 @@ export namespace TOKEN {
     WORD = 'Word',
     ROOT = 'Root',
     PARAGRAPH = 'Paragraph',
+    ESCAPE = 'Escape',
   }
   export const TOKEN_TYPE_HEADERS = [
     //
@@ -28,8 +29,8 @@ export namespace TOKEN {
   ];
 
   export class Token {
-    _type: TOKEN_TYPE;
-    _value: (Token | string)[];
+    private _type: TOKEN_TYPE;
+    private _value: (Token | string)[];
 
     constructor(type: TOKEN_TYPE, value: (Token | string)[]) {
       this._type = type;

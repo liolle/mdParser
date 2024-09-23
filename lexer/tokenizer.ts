@@ -10,7 +10,6 @@ export namespace TOKENIZER {
   ) {
     const lexer = new Lexer.Lexer(source);
 
-    let idx = Infinity;
     while (!lexer.eof()) {
       let found = false;
       for (const pattern of options.patterns) {
@@ -31,7 +30,7 @@ export namespace TOKENIZER {
         )
           continue;
 
-        pattern.handler(lexer, pattern.regex(), exec_res[0], idx);
+        pattern.handler(lexer, pattern.regex(), exec_res[0]);
         found = true;
         break;
       }
