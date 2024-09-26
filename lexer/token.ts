@@ -18,7 +18,10 @@ export namespace TOKEN {
     PARAGRAPH = 'Paragraph',
     ESCAPE = 'Escape',
     EXTERNAL_LINK = 'External_link',
+    UL = 'Ul',
+    LI = 'Li',
   }
+
   export const TOKEN_TYPE_HEADERS = [
     //
     TOKEN_TYPE.H1,
@@ -33,28 +36,33 @@ export namespace TOKEN {
 
   export class Token {
     private _type: TOKEN_TYPE;
-    private _value: (Token | string)[];
+    private _children: Token[];
+    private _body: string;
 
-    constructor(type: TOKEN_TYPE, value: (Token | string)[]) {
+    constructor(type: TOKEN_TYPE, body: string, children: Token[]) {
       this._type = type;
-      this._value = value;
+      this._children = children || [];
+      this._body = body;
     }
 
-    get value() {
-      return this._value;
+    get children() {
+      return this._children;
     }
 
     get type() {
       return this._type;
     }
 
+    get body() {
+      return this._body;
+    }
+
     print(indent: number = 0): string {
       const indentation = ' '.repeat(indent);
-      let output = `${indentation}[${this.type}]`;
+      let output = `${indentation}[${this.type}]: ${this.body}`;
 
-      for (const elem of this.value) {
-        if (typeof elem === 'string') output += `: ${elem != '\n' ? elem : ''}`;
-        else output += `\n${elem.print(indent + TOKEN_DISPLAY_INDENTATION)}`;
+      for (const elem of this.children) {
+        output += `\n${elem.print(indent + TOKEN_DISPLAY_INDENTATION)}`;
       }
 
       return output;
@@ -65,21 +73,17 @@ export namespace TOKEN {
     DEFAULT = 'Default',
     IMAGE = 'Image',
   }
+  export type LIST_TOKEN_TYPE = TOKEN.TOKEN_TYPE.UL | TOKEN.TOKEN_TYPE.LI;
+
   export class LinkToken extends Token {
-    private _url: string;
     private _kind: LINK_TOKEN_TYPE;
     constructor(
-      url: string,
-      value: (Token | string)[],
+      body: string,
+      children: Token[],
       kind: LINK_TOKEN_TYPE = LINK_TOKEN_TYPE.DEFAULT,
     ) {
-      super(TOKEN_TYPE.EXTERNAL_LINK, value || []);
-      this._url = url;
+      super(TOKEN_TYPE.EXTERNAL_LINK, body, children || []);
       this._kind = kind;
-    }
-
-    get url() {
-      return this._url;
     }
 
     get kind() {
@@ -87,18 +91,45 @@ export namespace TOKEN {
     }
 
     get isNamed() {
-      return super.value[0] != undefined;
+      return super.children[0] != undefined;
     }
 
     get isUrlSet() {
-      return this._url != undefined && this._url != '';
+      return super.body != undefined && super.body != '';
     }
 
     print(indent: number = 0) {
       const indentation = ' '.repeat(indent);
-      let output = `${indentation}[${this.type}]: ${this.url || ''}`;
+      let output = `${indentation}[${this.type}]: ${super.body || ''}`;
 
-      for (const elem of this.value) {
+      for (const elem of this.children) {
+        output += `\n${elem.print(indent + TOKEN_DISPLAY_INDENTATION)}`;
+      }
+
+      return output;
+    }
+  }
+
+  export class ListToken extends Token {
+    private _kind: TOKEN_TYPE;
+    constructor(
+      body: string,
+      children: Token[],
+      kind: LIST_TOKEN_TYPE = TOKEN_TYPE.UL,
+    ) {
+      super(TOKEN_TYPE.EXTERNAL_LINK, body, children || []);
+      this._kind = kind;
+    }
+
+    get kind() {
+      return this._kind;
+    }
+
+    print(indent: number = 0) {
+      const indentation = ' '.repeat(indent);
+      let output = `${indentation}[${this.type}]: ${super.body || ''}`;
+
+      for (const elem of this.children) {
         if (typeof elem === 'string') {
         } else output += `\n${elem.print(indent + TOKEN_DISPLAY_INDENTATION)}`;
       }
@@ -107,26 +138,26 @@ export namespace TOKEN {
     }
   }
 
-  export function displayToken(token: Token, indent: number = 0): string {
-    const indentation = ' '.repeat(indent);
-    let output = `${indentation}[${token.type}]`;
+  // export function displayToken(token: Token, indent: number = 0): string {
+  //   const indentation = ' '.repeat(indent);
+  //   let output = `${indentation}[${token.type}]`;
 
-    token.value.forEach(item => {
-      if (typeof item === 'string') {
-        output += `: ${item != '\n' ? item : ''}`;
-      } else {
-        output += `\n${displayToken(item, indent + TOKEN_DISPLAY_INDENTATION)}`;
-      }
-    });
-    return output;
-  }
+  //   token.children.forEach(item => {
+  //     if (typeof item === 'string') {
+  //       output += `: ${item != '\n' ? item : ''}`;
+  //     } else {
+  //       output += `\n${displayToken(item, indent + TOKEN_DISPLAY_INDENTATION)}`;
+  //     }
+  //   });
+  //   return output;
+  // }
 
   export function tokenEquals(t1: Token, t2: Token) {
     if (t1.type != this.type) return false;
 
-    if (t1.type == TOKEN_TYPE.WORD) return t1.value[0] == t2.value[0];
+    if (t1.type == TOKEN_TYPE.WORD) return t1.children[0] == t2.children[0];
 
-    for (let i = 0; i < t1.value.length; i++) {
+    for (let i = 0; i < t1.children.length; i++) {
       if (!tokenEquals(t1[i], t2[i])) return false;
     }
     return true;
