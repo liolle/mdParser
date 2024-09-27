@@ -45,6 +45,11 @@ export namespace TOKEN {
       this._body = body;
     }
 
+    pushToChildren(token: Token) {
+      if (this.type != TOKEN_TYPE.UL) this._type = TOKEN_TYPE.UL;
+      this._children.push(token);
+    }
+
     get children() {
       return this._children;
     }
@@ -55,6 +60,11 @@ export namespace TOKEN {
 
     get body() {
       return this._body;
+    }
+
+    appendWord(token: Token) {
+      if (this.type != TOKEN_TYPE.WORD || token.type != TOKEN_TYPE.WORD) return;
+      this._body += token.body;
     }
 
     print(indent: number = 0): string {
@@ -111,46 +121,136 @@ export namespace TOKEN {
   }
 
   export class ListToken extends Token {
-    private _kind: TOKEN_TYPE;
+    private _depth: number;
+    private _last_modified_token: ListToken;
     constructor(
       body: string,
       children: Token[],
-      kind: LIST_TOKEN_TYPE = TOKEN_TYPE.UL,
+      depth: number,
+      kind: LIST_TOKEN_TYPE = TOKEN_TYPE.LI,
     ) {
-      super(TOKEN_TYPE.EXTERNAL_LINK, body, children || []);
-      this._kind = kind;
+      super(kind, body, children || []);
+      this._depth = depth;
     }
 
-    get kind() {
-      return this._kind;
+    get depth() {
+      return this._depth;
+    }
+
+    get last_modified_token() {
+      return this._last_modified_token;
+    }
+
+    #fuseParagraph(token: Token) {
+      let node = this.children[this.children.length - 1];
+      while (node && node.children.length > 1) {
+        node = node.children[node.children.length - 1];
+      }
+
+      const n = token.children.length;
+      for (const t of token.children) {
+      }
+      let i = 0;
+      for (; i < n; i++) {
+        if (token.children[i].type != TOKEN_TYPE.WORD) break;
+        node.children[0].appendWord(token.children[i]);
+      }
+
+      for (; i < n; i++) {
+        node.children.push(token.children[i]);
+      }
+    }
+
+    setLastModified(token: ListToken) {
+      this._last_modified_token = token;
+    }
+
+    fuse(token: Token) {
+      if (
+        token.type != TOKEN_TYPE.UL &&
+        token.type != TOKEN_TYPE.LI &&
+        token.type != TOKEN_TYPE.PARAGRAPH
+      ) {
+        return;
+      }
+
+      if (token.type == TOKEN_TYPE.PARAGRAPH) {
+        this.#fuseParagraph(token);
+      }
     }
 
     print(indent: number = 0) {
       const indentation = ' '.repeat(indent);
-      let output = `${indentation}[${this.type}]: ${super.body || ''}`;
+      let output = `${indentation}[${this.type}]`;
 
       for (const elem of this.children) {
-        if (typeof elem === 'string') {
-        } else output += `\n${elem.print(indent + TOKEN_DISPLAY_INDENTATION)}`;
+        output += `\n${elem.print(indent + TOKEN_DISPLAY_INDENTATION)}`;
       }
-
       return output;
     }
   }
 
-  // export function displayToken(token: Token, indent: number = 0): string {
-  //   const indentation = ' '.repeat(indent);
-  //   let output = `${indentation}[${token.type}]`;
+  class NestedList {
+    private _stack: ListToken[] = [];
+    private _token: ListToken;
 
-  //   token.children.forEach(item => {
-  //     if (typeof item === 'string') {
-  //       output += `: ${item != '\n' ? item : ''}`;
-  //     } else {
-  //       output += `\n${displayToken(item, indent + TOKEN_DISPLAY_INDENTATION)}`;
-  //     }
-  //   });
-  //   return output;
-  // }
+    constructor(token: ListToken) {
+      this._token = token;
+      this._stack.push(token);
+      if (token.last_modified_token)
+        this._stack.push(token.last_modified_token);
+    }
+
+    pushElement(body: string, depth: number) {
+      let node = this.#last;
+      while (depth <= node.depth) {
+        this._stack.pop();
+        node = this.#last;
+      }
+      const new_node = new ListToken(
+        '',
+        [new TOKEN.Token(TOKEN.TOKEN_TYPE.WORD, body, [])],
+        depth,
+      );
+      node.pushToChildren(new_node);
+      this._stack.push(new_node);
+      this._token.setLastModified(node);
+    }
+
+    get #size() {
+      return this._stack.length;
+    }
+
+    get #last() {
+      return this._stack[this.#size - 1];
+    }
+
+    get token() {
+      return this._token;
+    }
+  }
+
+  export class ListTokenBuilder {
+    private list: NestedList;
+    private _token: ListToken;
+
+    constructor(token = new ListToken('', [], 0, TOKEN_TYPE.UL)) {
+      this._token = token;
+      this.list = new NestedList(this._token);
+    }
+
+    pushElement(raw_value: string) {
+      // count depth
+      if (raw_value == '') return;
+      const [spaces, body] = raw_value.split('- ');
+      let depth = (spaces ? spaces.length : 0) + 1;
+      this.list.pushElement(body, depth);
+    }
+
+    get token() {
+      return this.list.token;
+    }
+  }
 
   export function tokenEquals(t1: Token, t2: Token) {
     if (t1.type != this.type) return false;

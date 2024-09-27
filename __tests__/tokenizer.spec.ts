@@ -391,14 +391,81 @@ describe('Parsing', () => {
   });
 
   suite('List', () => {
-    test('', () => {
+    test('Base list', () => {
       const tokens = TOKENIZER.tokenize(CONSTANT.BaseList);
 
-      const expected_token = new TOKEN.Token(TOKEN.TOKEN_TYPE.UL, '', [
-        new TOKEN.Token(TOKEN.TOKEN_TYPE.UL, '', [
-          new TOKEN.Token(TOKEN.TOKEN_TYPE.LI, '', []),
-        ]),
+      const root = new TOKEN.Token(TOKEN.TOKEN_TYPE.ROOT, '', tokens);
+
+      const expected_token = new TOKEN.Token(TOKEN.TOKEN_TYPE.ROOT, '', [
+        new TOKEN.Token(TOKEN.TOKEN_TYPE.NEW_LINE, '', []),
+        new TOKEN.ListToken(
+          '',
+          [
+            new TOKEN.ListToken(
+              '',
+              [
+                new TOKEN.Token(TOKEN.TOKEN_TYPE.WORD, 'A', []),
+                new TOKEN.ListToken(
+                  '',
+                  [
+                    new TOKEN.Token(TOKEN.TOKEN_TYPE.WORD, 'Sub list of A', []),
+                    new TOKEN.ListToken(
+                      '',
+                      [
+                        new TOKEN.Token(
+                          TOKEN.TOKEN_TYPE.WORD,
+                          'Element of sub list of A',
+                          [],
+                        ),
+                      ],
+                      4,
+                      TOKEN.TOKEN_TYPE.LI,
+                    ),
+                  ],
+                  3,
+                  TOKEN.TOKEN_TYPE.UL,
+                ),
+              ],
+              1,
+              TOKEN.TOKEN_TYPE.UL,
+            ),
+            new TOKEN.ListToken(
+              '',
+              [
+                new TOKEN.Token(TOKEN.TOKEN_TYPE.WORD, 'B', []),
+                new TOKEN.ListToken(
+                  '',
+                  [
+                    new TOKEN.Token(
+                      TOKEN.TOKEN_TYPE.WORD,
+                      'Sub list of BElement',
+                      [],
+                    ),
+                  ],
+                  3,
+                ),
+                new TOKEN.ListToken(
+                  '',
+                  [new TOKEN.Token(TOKEN.TOKEN_TYPE.WORD, 'Sub list of B', [])],
+                  3,
+                ),
+              ],
+              1,
+              TOKEN.TOKEN_TYPE.UL,
+            ),
+            new TOKEN.ListToken(
+              '',
+              [new TOKEN.Token(TOKEN.TOKEN_TYPE.WORD, 'Simple LI', [])],
+              1,
+              TOKEN.TOKEN_TYPE.LI,
+            ),
+          ],
+          0,
+          TOKEN.TOKEN_TYPE.UL,
+        ),
       ]);
+
+      expect(root.print()).toEqual(expected_token.print());
     });
   });
 });

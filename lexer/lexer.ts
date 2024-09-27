@@ -93,9 +93,21 @@ export namespace Lexer {
       handler: externalLinkHandler(TOKEN.TOKEN_TYPE.EXTERNAL_LINK),
       type: TOKEN.TOKEN_TYPE.EXTERNAL_LINK,
     },
+    UL: {
+      regex: () => /[ \t]*- [^\n]*(\s*- [^\n]*\n?)*/,
+      handler: listHandler(TOKEN.TOKEN_TYPE.UL),
+      type: TOKEN.TOKEN_TYPE.UL,
+    },
+    LI: {
+      regex: () => /[ \t]*- [^\n]*(\s*- [^\n]*\n?)*/,
+      handler: listHandler(TOKEN.TOKEN_TYPE.UL),
+      type: TOKEN.TOKEN_TYPE.UL,
+    },
   };
   export const ALL_PATTERNS: Pattern[] = [
     //
+    PATTERNS.UL,
+    PATTERNS.LI,
     PATTERNS.ESCAPE,
     PATTERNS.NEW_LINE,
     PATTERNS.EXTERNAL_LINK,
@@ -225,7 +237,7 @@ export namespace Lexer {
 
 function defaultHandler(type: TOKEN.TOKEN_TYPE) {
   return (lexer: Lexer.Lexer, regex: RegExp, raw_value: string) => {
-    lexer.push(new TOKEN.Token(type, raw_value, []));
+    lexer.push(new TOKEN.Token(type, raw_value == '\n' ? '' : raw_value, []));
     lexer.bump(raw_value.length);
 
     if (raw_value == '\n') lexer.bumpLine();
@@ -358,10 +370,18 @@ function paragraphHandler(type: TOKEN.TOKEN_TYPE, key: string) {
     let word = {
       word: '',
     };
+    const last_element = lexer.tokens[lexer.tokens.length - 1];
 
     nestedSearch(Lexer.PARAGRAPH_NESTED_PATTERNS, body, type, tokens, word);
 
-    lexer.push(new TOKEN.Token(type, word.word, tokens));
+    if (last_element && last_element.type == TOKEN.TOKEN_TYPE.UL) {
+      const list_token = lexer.tokens[
+        lexer.tokens.length - 1
+      ] as TOKEN.ListToken;
+      list_token.fuse(new TOKEN.Token(type, word.word, tokens));
+    } else {
+      lexer.push(new TOKEN.Token(type, word.word, tokens));
+    }
     lexer.bump(raw_value.length);
 
     return true;
@@ -383,6 +403,34 @@ function headerHandler(type: TOKEN.TOKEN_TYPE, key: string) {
     nestedSearch(Lexer.HEADER_NESTED_PATTERNS, body, type, tokens, word);
 
     lexer.push(new TOKEN.Token(type, word.word, tokens));
+    lexer.bump(raw_value.length);
+
+    return true;
+  };
+}
+
+function listHandler(type: TOKEN.TOKEN_TYPE) {
+  return (lexer: Lexer.Lexer, regex: RegExp, raw_value: string) => {
+    // extract body
+    const len = lexer.tokens.length;
+    let list: TOKEN.ListTokenBuilder;
+    const last_element = lexer.tokens[len - 1];
+
+    if (last_element.type == TOKEN.TOKEN_TYPE.UL) {
+      const list_token = lexer.tokens[len - 1] as TOKEN.ListToken;
+      const list = new TOKEN.ListTokenBuilder(list_token);
+      for (const line of raw_value.split('\n')) {
+        list.pushElement(line);
+      }
+    } else {
+      list = new TOKEN.ListTokenBuilder();
+      for (const line of raw_value.split('\n')) {
+        list.pushElement(line);
+      }
+
+      lexer.push(list.token);
+    }
+
     lexer.bump(raw_value.length);
 
     return true;
