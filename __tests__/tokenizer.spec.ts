@@ -392,40 +392,44 @@ describe('Parsing', () => {
 
   suite('List', () => {
     test('Base list', () => {
-      const tokens = TOKENIZER.tokenize(CONSTANT.BaseList);
+      const actual = TOKEN.Factory.ROOT(TOKENIZER.tokenize(CONSTANT.BaseList));
+
+      const expected = TOKEN.Factory.ROOT([
+        TOKEN.Factory.NEW_LINE(),
+        TOKEN.Factory.UL([
+          TOKEN.Factory.UL([
+            TOKEN.Factory.WORD('A'),
+            TOKEN.Factory.UL([
+              TOKEN.Factory.WORD('Sub list of A'),
+              TOKEN.Factory.LI('Element of sub list of A'),
+            ]),
+          ]),
+
+          TOKEN.Factory.UL([
+            TOKEN.Factory.WORD('B'),
+            TOKEN.Factory.LI('Sub list of BElement'),
+            TOKEN.Factory.LI('Sub list of B'),
+          ]),
+          TOKEN.Factory.LI('Simple LI'),
+        ]),
+      ]);
+
+      expect(actual.print()).toEqual(expected.print());
+    });
+
+    test('TaskList', () => {
+      const tokens = TOKENIZER.tokenize(CONSTANT.BaseList2);
 
       const root = new TOKEN.Token(TOKEN.TOKEN_TYPE.ROOT, '', tokens);
 
       const expected_token = new TOKEN.Token(TOKEN.TOKEN_TYPE.ROOT, '', [
-        new TOKEN.Token(TOKEN.TOKEN_TYPE.NEW_LINE, '', []),
+        TOKEN.Factory.NEW_LINE(),
         new TOKEN.ListToken(
           '',
           [
             new TOKEN.ListToken(
               '',
-              [
-                new TOKEN.Token(TOKEN.TOKEN_TYPE.WORD, 'A', []),
-                new TOKEN.ListToken(
-                  '',
-                  [
-                    new TOKEN.Token(TOKEN.TOKEN_TYPE.WORD, 'Sub list of A', []),
-                    new TOKEN.ListToken(
-                      '',
-                      [
-                        new TOKEN.Token(
-                          TOKEN.TOKEN_TYPE.WORD,
-                          'Element of sub list of A',
-                          [],
-                        ),
-                      ],
-                      4,
-                      TOKEN.TOKEN_TYPE.LI,
-                    ),
-                  ],
-                  3,
-                  TOKEN.TOKEN_TYPE.UL,
-                ),
-              ],
+              [new TOKEN.Token(TOKEN.TOKEN_TYPE.WORD, 'A', [])],
               1,
               TOKEN.TOKEN_TYPE.UL,
             ),
@@ -464,8 +468,6 @@ describe('Parsing', () => {
           TOKEN.TOKEN_TYPE.UL,
         ),
       ]);
-
-      expect(root.print()).toEqual(expected_token.print());
     });
   });
 });

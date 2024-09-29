@@ -267,4 +267,38 @@ export namespace TOKEN {
     for (const t of types) if (t == type) return true;
     return false;
   }
+
+  export class Factory {
+    constructor() {}
+
+    static NEW_LINE() {
+      return new Token(TOKEN.TOKEN_TYPE.NEW_LINE, '', []);
+    }
+
+    static WORD(body: string) {
+      return new Token(TOKEN.TOKEN_TYPE.WORD, body, []);
+    }
+
+    static LI(body: string, depth = 0) {
+      return new ListToken(
+        '',
+        [Factory.WORD(body)],
+        depth,
+        TOKEN.TOKEN_TYPE.LI,
+      );
+    }
+
+    static UL(tokens: Token[], depth = 0) {
+      return new ListToken('', tokens, depth, TOKEN.TOKEN_TYPE.UL);
+    }
+
+    static ROOT(tokens: Token[]) {
+      return new Token(TOKEN_TYPE.ROOT, '', tokens);
+    }
+
+    // TODO
+    // static WORD_GROUP(tokens: Token[]) {
+    //   return new Token(TOKEN.TOKEN_TYPE.WORD, '', tokens);
+    // }
+  }
 }
