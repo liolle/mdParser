@@ -103,6 +103,11 @@ export namespace Lexer {
       handler: listHandler(TOKEN.TOKEN_TYPE.UL),
       type: TOKEN.TOKEN_TYPE.UL,
     },
+    CHECK_BOX: {
+      regex: () => /\[[ xX]\]/,
+      handler: listHandler(TOKEN.TOKEN_TYPE.UL),
+      type: TOKEN.TOKEN_TYPE.UL,
+    },
   };
   export const ALL_PATTERNS: Pattern[] = [
     //

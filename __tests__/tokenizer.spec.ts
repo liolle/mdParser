@@ -1,4 +1,4 @@
-import { describe, expect, suite, test } from 'vitest';
+import { describe, expect, onTestFailed, suite, test } from 'vitest';
 import { TOKENIZER } from '../lexer/tokenizer';
 import { TOKEN } from '../lexer/token';
 import { CONSTANT } from './constants';
@@ -414,60 +414,38 @@ describe('Parsing', () => {
         ]),
       ]);
 
-      expect(actual.print()).toEqual(expected.print());
+      expect(actual.equal(expected)).toEqual(true);
     });
 
     test('TaskList', () => {
-      const tokens = TOKENIZER.tokenize(CONSTANT.BaseList2);
+      const actual = TOKEN.Factory.ROOT(TOKENIZER.tokenize(CONSTANT.BaseList2));
 
-      const root = new TOKEN.Token(TOKEN.TOKEN_TYPE.ROOT, '', tokens);
-
-      const expected_token = new TOKEN.Token(TOKEN.TOKEN_TYPE.ROOT, '', [
+      const expected = TOKEN.Factory.ROOT([
         TOKEN.Factory.NEW_LINE(),
-        new TOKEN.ListToken(
-          '',
-          [
-            new TOKEN.ListToken(
-              '',
-              [new TOKEN.Token(TOKEN.TOKEN_TYPE.WORD, 'A', [])],
-              1,
-              TOKEN.TOKEN_TYPE.UL,
-            ),
-            new TOKEN.ListToken(
-              '',
-              [
-                new TOKEN.Token(TOKEN.TOKEN_TYPE.WORD, 'B', []),
-                new TOKEN.ListToken(
-                  '',
-                  [
-                    new TOKEN.Token(
-                      TOKEN.TOKEN_TYPE.WORD,
-                      'Sub list of BElement',
-                      [],
-                    ),
-                  ],
-                  3,
-                ),
-                new TOKEN.ListToken(
-                  '',
-                  [new TOKEN.Token(TOKEN.TOKEN_TYPE.WORD, 'Sub list of B', [])],
-                  3,
-                ),
-              ],
-              1,
-              TOKEN.TOKEN_TYPE.UL,
-            ),
-            new TOKEN.ListToken(
-              '',
-              [new TOKEN.Token(TOKEN.TOKEN_TYPE.WORD, 'Simple LI', [])],
-              1,
-              TOKEN.TOKEN_TYPE.LI,
-            ),
-          ],
-          0,
-          TOKEN.TOKEN_TYPE.UL,
-        ),
+        TOKEN.Factory.UL([
+          TOKEN.Factory.UL([
+            TOKEN.Factory.WORD('A'),
+            TOKEN.Factory.CHECK_BOX(false, 'Sub task of A'),
+          ]),
+          TOKEN.Factory.UL([
+            TOKEN.Factory.WORD('B'),
+            TOKEN.Factory.CHECK_BOX(false, 'Sub task of B'),
+          ]),
+
+          TOKEN.Factory.CHECK_BOX_UL(false, [
+            TOKEN.Factory.CHECK_BOX(false, 'Tasks C'),
+            TOKEN.Factory.CHECK_BOX(false, 'Sub task of C'),
+            TOKEN.Factory.LI('[] not a task'),
+            TOKEN.Factory.LI('[x]not a task'),
+          ]),
+        ]),
       ]);
+
+      onTestFailed(e => {
+        expect(actual.print()).toEqual(expected.print());
+      });
+
+      expect(actual.equal(expected)).toEqual(true);
     });
   });
 });

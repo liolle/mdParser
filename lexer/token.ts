@@ -20,6 +20,9 @@ export namespace TOKEN {
     EXTERNAL_LINK = 'External_link',
     UL = 'Ul',
     LI = 'Li',
+    INPUT = 'Input',
+    CHECK_BOX = 'CheckBox',
+    CHECK_BOX_UL = 'CheckBoxUL',
   }
 
   export const TOKEN_TYPE_HEADERS = [
@@ -46,7 +49,12 @@ export namespace TOKEN {
     }
 
     pushToChildren(token: Token) {
-      if (this.type != TOKEN_TYPE.UL) this._type = TOKEN_TYPE.UL;
+      this._type = TOKEN_TYPE.UL;
+      this._children.push(token);
+    }
+
+    pushToChildrenWithType(token: Token, type: TOKEN_TYPE) {
+      this._type = type;
       this._children.push(token);
     }
 
@@ -67,6 +75,17 @@ export namespace TOKEN {
       this._body += token.body;
     }
 
+    equal(token: Token) {
+      if (token.type != this.type) return false;
+      if (token.body != this.body) return false;
+      if (token.children.length != this.children.length) return false;
+
+      for (let i = 0; i < this.children.length; i++) {
+        if (!this.children[i].equal(token.children[i])) return false;
+      }
+      return true;
+    }
+
     print(indent: number = 0): string {
       const indentation = ' '.repeat(indent);
       let output = `${indentation}[${this.type}]: ${this.body}`;
@@ -83,7 +102,11 @@ export namespace TOKEN {
     DEFAULT = 'Default',
     IMAGE = 'Image',
   }
-  export type LIST_TOKEN_TYPE = TOKEN.TOKEN_TYPE.UL | TOKEN.TOKEN_TYPE.LI;
+  export type LIST_TOKEN_TYPE =
+    | TOKEN.TOKEN_TYPE.UL
+    | TOKEN.TOKEN_TYPE.LI
+    | TOKEN.TOKEN_TYPE.CHECK_BOX
+    | TOKEN.TOKEN_TYPE.CHECK_BOX_UL;
 
   export class LinkToken extends Token {
     private _kind: LINK_TOKEN_TYPE;
@@ -207,14 +230,21 @@ export namespace TOKEN {
         this._stack.pop();
         node = this.#last;
       }
-      const new_node = new ListToken(
-        '',
-        [new TOKEN.Token(TOKEN.TOKEN_TYPE.WORD, body, [])],
-        depth,
-      );
+
+      const new_node = this.#getNestedNode(body, depth);
+
       node.pushToChildren(new_node);
+
       this._stack.push(new_node);
       this._token.setLastModified(node);
+    }
+
+    #getNestedNode(body: string, depth: number): ListToken {
+      if (/\[[xX ]\] /.test(body)) {
+        const parts = body.split(/\[[xX ]\] /);
+        return Factory.CHECK_BOX(false, parts[parts.length - 1], depth);
+      }
+      return Factory.LI(body, depth);
     }
 
     get #size() {
@@ -252,20 +282,66 @@ export namespace TOKEN {
     }
   }
 
-  export function tokenEquals(t1: Token, t2: Token) {
-    if (t1.type != this.type) return false;
-
-    if (t1.type == TOKEN_TYPE.WORD) return t1.children[0] == t2.children[0];
-
-    for (let i = 0; i < t1.children.length; i++) {
-      if (!tokenEquals(t1[i], t2[i])) return false;
-    }
-    return true;
-  }
-
   export function oneOf(type: TOKEN_TYPE, ...types: TOKEN_TYPE[]) {
     for (const t of types) if (t == type) return true;
     return false;
+  }
+
+  export class CheckBoxToken extends ListToken {
+    private _checked = false;
+
+    constructor(
+      checked: boolean,
+      type: LIST_TOKEN_TYPE,
+      body: string,
+      children: Token[],
+      depth = 0,
+    ) {
+      super('', children, depth, type);
+      this._checked = checked;
+    }
+
+    get checked() {
+      return this._checked;
+    }
+
+    toggle() {
+      this._checked = !this._checked;
+    }
+
+    setChecked(val: boolean) {
+      this._checked = val;
+    }
+
+    pushToChildren(token: Token) {
+      const word = this.children.pop();
+
+      if (word) {
+        if (word.type == TOKEN_TYPE.WORD) {
+          this.children.push(
+            Factory.CHECK_BOX(this.checked, word.body, this.depth),
+          );
+          super.pushToChildrenWithType(token, TOKEN.TOKEN_TYPE.CHECK_BOX);
+        } else {
+          this.children.push(word);
+          super.pushToChildrenWithType(token, TOKEN.TOKEN_TYPE.CHECK_BOX_UL);
+        }
+      }
+    }
+
+    equal(token: CheckBoxToken): boolean {
+      return super.equal(token) && this.checked == token.checked;
+    }
+
+    print(indent: number = 0) {
+      const indentation = ' '.repeat(indent);
+      let output = `${indentation}[${super.type}]`;
+
+      for (const elem of this.children) {
+        output += `\n${elem.print(indent + TOKEN_DISPLAY_INDENTATION)}`;
+      }
+      return output;
+    }
   }
 
   export class Factory {
@@ -294,6 +370,26 @@ export namespace TOKEN {
 
     static ROOT(tokens: Token[]) {
       return new Token(TOKEN_TYPE.ROOT, '', tokens);
+    }
+
+    static CHECK_BOX_UL(checked: boolean, tokens: Token[], depth = 0) {
+      return new CheckBoxToken(
+        checked,
+        TOKEN_TYPE.CHECK_BOX_UL,
+        '',
+        tokens,
+        depth,
+      );
+    }
+
+    static CHECK_BOX(checked: boolean, body: string, depth = 0) {
+      return new CheckBoxToken(
+        checked,
+        TOKEN_TYPE.CHECK_BOX,
+        '',
+        [Factory.WORD(body)],
+        depth,
+      );
     }
 
     // TODO
