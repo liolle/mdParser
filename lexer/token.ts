@@ -242,7 +242,13 @@ export namespace TOKEN {
     #getNestedNode(body: string, depth: number): ListToken {
       if (/\[[xX ]\] /.test(body)) {
         const parts = body.split(/\[[xX ]\] /);
-        return Factory.CHECK_BOX(false, parts[parts.length - 1], depth);
+        console.log('mark', body[1]);
+
+        return Factory.CHECK_BOX(
+          /[xX]/.test(body[1]),
+          parts[parts.length - 1],
+          depth,
+        );
       }
       return Factory.LI(body, depth);
     }
@@ -321,7 +327,7 @@ export namespace TOKEN {
           this.children.push(
             Factory.CHECK_BOX(this.checked, word.body, this.depth),
           );
-          super.pushToChildrenWithType(token, TOKEN.TOKEN_TYPE.CHECK_BOX);
+          super.pushToChildrenWithType(token, TOKEN.TOKEN_TYPE.CHECK_BOX_UL);
         } else {
           this.children.push(word);
           super.pushToChildrenWithType(token, TOKEN.TOKEN_TYPE.CHECK_BOX_UL);
@@ -335,7 +341,7 @@ export namespace TOKEN {
 
     print(indent: number = 0) {
       const indentation = ' '.repeat(indent);
-      let output = `${indentation}[${super.type}]`;
+      let output = `${indentation}[${super.type}]${this.checked}`;
 
       for (const elem of this.children) {
         output += `\n${elem.print(indent + TOKEN_DISPLAY_INDENTATION)}`;

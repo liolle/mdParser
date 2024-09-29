@@ -425,7 +425,10 @@ describe('Parsing', () => {
         TOKEN.Factory.UL([
           TOKEN.Factory.UL([
             TOKEN.Factory.WORD('A'),
-            TOKEN.Factory.CHECK_BOX(false, 'Sub task of A'),
+            TOKEN.Factory.CHECK_BOX_UL(false, [
+              TOKEN.Factory.CHECK_BOX(false, 'Sub task of A'),
+              TOKEN.Factory.CHECK_BOX(true, 'Checked task'),
+            ]),
           ]),
           TOKEN.Factory.UL([
             TOKEN.Factory.WORD('B'),

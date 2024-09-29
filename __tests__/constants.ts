@@ -21,6 +21,7 @@ Element
   export const BaseList2 = `
 - A
   - [ ] Sub task of A
+    - [X] Checked task
 - B
   - [ ] Sub task of B
 - [ ] Tasks C
