@@ -23,6 +23,8 @@ export namespace TOKEN {
     INPUT = 'Input',
     CHECK_BOX = 'CheckBox',
     CHECK_BOX_UL = 'CheckBoxUL',
+    INLINE_CODE = 'InlineCode',
+    CODE_BLOCK = 'CodeBlock',
   }
 
   export const TOKEN_TYPE_HEADERS = [
@@ -242,7 +244,6 @@ export namespace TOKEN {
     #getNestedNode(body: string, depth: number): ListToken {
       if (/\[[xX ]\] /.test(body)) {
         const parts = body.split(/\[[xX ]\] /);
-        console.log('mark', body[1]);
 
         return Factory.CHECK_BOX(
           /[xX]/.test(body[1]),
@@ -285,6 +286,44 @@ export namespace TOKEN {
 
     get token() {
       return this.list.token;
+    }
+  }
+
+  export enum SUPPORTED_LANGUAGES {
+    JS = 'Javascript',
+    DEFAULT = '',
+  }
+
+  export function resolveLanguage(language: string): SUPPORTED_LANGUAGES {
+    // js
+    const candidate = language.trim().toLowerCase();
+
+    if (/js|javascript/.test(candidate)) return SUPPORTED_LANGUAGES.JS;
+
+    return SUPPORTED_LANGUAGES.DEFAULT;
+  }
+
+  export class CodeToken extends Token {
+    private _language: SUPPORTED_LANGUAGES;
+    constructor(
+      type: TOKEN_TYPE.INLINE_CODE | TOKEN_TYPE.CODE_BLOCK,
+      body: string,
+      language = SUPPORTED_LANGUAGES.DEFAULT,
+    ) {
+      super(type, body.trim(), []);
+      this._language = language;
+    }
+
+    equal(token: CodeToken): boolean {
+      if (!(super.equal(token) && this.language == token.language)) {
+        return false;
+      }
+
+      return this.body == token.body;
+    }
+
+    get language() {
+      return this._language;
     }
   }
 
@@ -396,6 +435,18 @@ export namespace TOKEN {
         [Factory.WORD(body)],
         depth,
       );
+    }
+
+    static INLINE_CODE(body: string) {
+      return new CodeToken(
+        TOKEN_TYPE.INLINE_CODE,
+        body,
+        SUPPORTED_LANGUAGES.DEFAULT,
+      );
+    }
+
+    static CODE_BLOCK(body: string, language: SUPPORTED_LANGUAGES) {
+      return new CodeToken(TOKEN_TYPE.CODE_BLOCK, body, language);
     }
 
     // TODO

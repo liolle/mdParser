@@ -451,4 +451,39 @@ describe('Parsing', () => {
       expect(actual.equal(expected)).toEqual(true);
     });
   });
+
+  suite('Code', () => {
+    test('Inline code', () => {
+      const actual = TOKEN.Factory.ROOT(
+        TOKENIZER.tokenize(CONSTANT.InlineCode1),
+      );
+
+      const expected = TOKEN.Factory.ROOT([
+        TOKEN.Factory.INLINE_CODE('backticks'),
+      ]);
+
+      onTestFailed(e => {
+        expect(actual.print()).toEqual(expected.print());
+      });
+
+      expect(actual.equal(expected)).toEqual(true);
+    });
+
+    test('Block code', () => {
+      const actual = TOKEN.Factory.ROOT(
+        TOKENIZER.tokenize(CONSTANT.CodeBlock1),
+      );
+
+      const expected = TOKEN.Factory.ROOT([
+        TOKEN.Factory.NEW_LINE(),
+        TOKEN.Factory.CODE_BLOCK(CONSTANT.code1, TOKEN.SUPPORTED_LANGUAGES.JS),
+      ]);
+
+      onTestFailed(e => {
+        expect(actual.print()).toEqual(expected.print());
+      });
+
+      expect(actual.equal(expected)).toEqual(true);
+    });
+  });
 });

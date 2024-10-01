@@ -32,6 +32,17 @@ export namespace Lexer {
       handler: wrapperHandler(TOKEN.TOKEN_TYPE.HIGHLIGHT),
       type: TOKEN.TOKEN_TYPE.HIGHLIGHT,
     },
+    INLINE_CODE: {
+      regex: () => /((?<=[^`]|^)`(?=[^`]|$))[^\n]+((?<=[^`]|^)`(?=[^`]|$))/g,
+      handler: codeHandler(TOKEN.TOKEN_TYPE.INLINE_CODE),
+      type: TOKEN.TOKEN_TYPE.INLINE_CODE,
+    },
+    CODE_BLOCK: {
+      regex: () =>
+        /((?<=[^`]|^)`{3}(?=[^`]|$))(.|\n)*((?<=[^`]|^)`{3}(?=[^`]|$))/g,
+      handler: codeHandler(TOKEN.TOKEN_TYPE.CODE_BLOCK),
+      type: TOKEN.TOKEN_TYPE.CODE_BLOCK,
+    },
     SPACE: {
       regex: () => / /,
       handler: defaultHandler(TOKEN.TOKEN_TYPE.SPACE),
@@ -115,6 +126,7 @@ export namespace Lexer {
     PATTERNS.LI,
     PATTERNS.ESCAPE,
     PATTERNS.NEW_LINE,
+    PATTERNS.CODE_BLOCK,
     PATTERNS.EXTERNAL_LINK,
     PATTERNS.H6,
     PATTERNS.H5,
@@ -123,6 +135,7 @@ export namespace Lexer {
     PATTERNS.H2,
     PATTERNS.H1,
     PATTERNS.PARAGRAPH,
+    PATTERNS.INLINE_CODE,
     PATTERNS.BOLD,
     PATTERNS.ITALIC,
     PATTERNS.STRIKETHROUGH,
@@ -322,6 +335,34 @@ function escapeHandler(type: TOKEN.TOKEN_TYPE) {
   };
 }
 
+function codeHandler(
+  type: TOKEN.TOKEN_TYPE.INLINE_CODE | TOKEN.TOKEN_TYPE.CODE_BLOCK,
+) {
+  return (lexer: Lexer.Lexer, regex: RegExp, raw_value: string) => {
+    let body = '';
+
+    switch (type) {
+      case TOKEN.TOKEN_TYPE.INLINE_CODE:
+        body = raw_value.slice(1, raw_value.length - 1);
+        lexer.push(TOKEN.Factory.INLINE_CODE(body));
+        break;
+
+      case TOKEN.TOKEN_TYPE.CODE_BLOCK:
+        const parts = raw_value.slice(3, raw_value.length - 3).split('\n');
+        const lg = TOKEN.resolveLanguage(parts.shift() || '');
+        body = parts.join('\n');
+        lexer.push(TOKEN.Factory.CODE_BLOCK(body, lg));
+        break;
+      default:
+        break;
+    }
+
+    lexer.bump(raw_value.length);
+
+    return true;
+  };
+}
+
 function wrapperHandler(type: TOKEN.TOKEN_TYPE) {
   return (lexer: Lexer.Lexer, regex: RegExp, raw_value: string) => {
     let size = 1;
@@ -345,6 +386,11 @@ function wrapperHandler(type: TOKEN.TOKEN_TYPE) {
       case TOKEN.TOKEN_TYPE.HIGHLIGHT:
         size = 2;
         patterns = Lexer.STRIKETHROUGH_NESTED_PATTER;
+        break;
+
+      case TOKEN.TOKEN_TYPE.INLINE_CODE:
+        size = 1;
+
         break;
 
       default:
