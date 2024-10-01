@@ -145,6 +145,7 @@ export namespace Lexer {
   ];
   export const PARAGRAPH_NESTED_PATTERNS: Pattern[] = [
     //
+    PATTERNS.ESCAPE,
     PATTERNS.EXTERNAL_LINK,
     PATTERNS.BOLD,
     PATTERNS.ITALIC,
@@ -155,6 +156,7 @@ export namespace Lexer {
 
   export const HEADER_NESTED_PATTERNS: Pattern[] = [
     //
+    PATTERNS.ESCAPE,
     PATTERNS.EXTERNAL_LINK,
     PATTERNS.BOLD,
     PATTERNS.ITALIC,
@@ -165,6 +167,7 @@ export namespace Lexer {
 
   export const BOLD_NESTED_PATTERNS: Pattern[] = [
     //
+    PATTERNS.ESCAPE,
     PATTERNS.EXTERNAL_LINK,
     PATTERNS.ITALIC,
     PATTERNS.STRIKETHROUGH,
@@ -173,6 +176,7 @@ export namespace Lexer {
   ];
   export const ITALIC_NESTED_PATTERNS: Pattern[] = [
     //
+    PATTERNS.ESCAPE,
     PATTERNS.EXTERNAL_LINK,
     PATTERNS.BOLD,
     PATTERNS.STRIKETHROUGH,
@@ -182,6 +186,7 @@ export namespace Lexer {
 
   export const STRIKETHROUGH_NESTED_PATTER: Pattern[] = [
     //
+    PATTERNS.ESCAPE,
     PATTERNS.EXTERNAL_LINK,
     PATTERNS.BOLD,
     PATTERNS.ITALIC,
@@ -191,6 +196,7 @@ export namespace Lexer {
 
   export const HIGHLIGHT_NESTED_PATTER: Pattern[] = [
     //
+    PATTERNS.ESCAPE,
     PATTERNS.EXTERNAL_LINK,
     PATTERNS.BOLD,
     PATTERNS.ITALIC,
@@ -200,6 +206,7 @@ export namespace Lexer {
 
   export const EXTERNAL_LINK_NESTED_PATTER: Pattern[] = [
     //
+    PATTERNS.ESCAPE,
     PATTERNS.BOLD,
     PATTERNS.ITALIC,
     PATTERNS.STRIKETHROUGH,

@@ -160,26 +160,21 @@ describe('Parsing', () => {
     });
 
     test('Escaped character 3', () => {
-      const tokens = TOKENIZER.tokenize(
-        String.raw`\*_This line will be italic and show the asterisks_\*`,
-      );
+      const actual = TOKEN.Factory.ROOT(TOKENIZER.tokenize(CONSTANT.escaped3));
 
-      const expected_token = new TOKEN.Token(TOKEN.TOKEN_TYPE.ROOT, '', [
-        new TOKEN.Token(TOKEN.TOKEN_TYPE.ESCAPE, `*`, []),
-        new TOKEN.Token(TOKEN.TOKEN_TYPE.ITALIC, '', [
-          new TOKEN.Token(
-            TOKEN.TOKEN_TYPE.WORD,
-            `This line will be italic and show the asterisks`,
-            [],
-          ),
+      const expected = TOKEN.Factory.ROOT([
+        TOKEN.Factory.ESCAPE('*'),
+        TOKEN.Factory.ITALIC([
+          TOKEN.Factory.WORD(`This line will be italic and show the asterisks`),
         ]),
-        new TOKEN.Token(TOKEN.TOKEN_TYPE.ESCAPE, `*`, []),
+        TOKEN.Factory.ESCAPE('*'),
       ]);
 
-      expect(tokens).toHaveLength(3);
-      expect(
-        new TOKEN.Token(TOKEN.TOKEN_TYPE.ROOT, '', tokens).print(),
-      ).toEqual(expected_token.print());
+      onTestFailed(e => {
+        expect(actual.print()).toEqual(expected.print());
+      });
+
+      expect(actual.equal(expected)).toEqual(true);
     });
   });
 

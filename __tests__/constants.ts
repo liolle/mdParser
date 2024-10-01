@@ -8,6 +8,8 @@ export namespace CONSTANT {
 ###### This is a heading 6
 `.trim();
 
+  export const escaped3 = String.raw`\*_This line will be italic and show the asterisks_\*`;
+
   export const BaseList = `
 - A
   - Sub list of A
