@@ -85,7 +85,7 @@ export namespace Lexer {
       type: TOKEN.TOKEN_TYPE.H1,
     },
     NEW_LINE: {
-      regex: () => /\n/,
+      regex: () => /\n|\s\n/,
       handler: defaultHandler(TOKEN.TOKEN_TYPE.NEW_LINE),
       type: TOKEN.TOKEN_TYPE.NEW_LINE,
     },
@@ -124,7 +124,6 @@ export namespace Lexer {
     //
     PATTERNS.UL,
     PATTERNS.LI,
-    PATTERNS.ESCAPE,
     PATTERNS.NEW_LINE,
     PATTERNS.CODE_BLOCK,
     PATTERNS.EXTERNAL_LINK,
@@ -135,6 +134,7 @@ export namespace Lexer {
     PATTERNS.H2,
     PATTERNS.H1,
     PATTERNS.PARAGRAPH,
+    PATTERNS.ESCAPE,
     PATTERNS.INLINE_CODE,
     PATTERNS.BOLD,
     PATTERNS.ITALIC,

@@ -90,7 +90,9 @@ export namespace TOKEN {
 
     print(indent: number = 0): string {
       const indentation = ' '.repeat(indent);
-      let output = `${indentation}[${this.type}]: ${this.body}`;
+      let output = `${indentation}[${this.type}]: ${
+        this.type != TOKEN_TYPE.NEW_LINE ? this.body : ''
+      }`;
 
       for (const elem of this.children) {
         output += `\n${elem.print(indent + TOKEN_DISPLAY_INDENTATION)}`;
