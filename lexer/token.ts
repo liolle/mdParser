@@ -449,9 +449,16 @@ export namespace TOKEN {
       return new CodeToken(TOKEN_TYPE.CODE_BLOCK, body, language);
     }
 
-    // TODO
-    // static WORD_GROUP(tokens: Token[]) {
-    //   return new Token(TOKEN.TOKEN_TYPE.WORD, '', tokens);
-    // }
+    static ITALIC(tokens: Token[]) {
+      return new TOKEN.Token(TOKEN.TOKEN_TYPE.ITALIC, '', tokens);
+    }
+
+    static ESCAPE(character: string) {
+      return new TOKEN.Token(
+        TOKEN.TOKEN_TYPE.ESCAPE,
+        character.slice(0, 1),
+        [],
+      );
+    }
   }
 }
