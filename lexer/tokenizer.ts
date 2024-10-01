@@ -8,7 +8,8 @@ export namespace TOKENIZER {
       patterns: Lexer.ALL_PATTERNS,
     },
   ) {
-    const lexer = new Lexer.Lexer(source);
+    const input = prepareInput(source);
+    const lexer = new Lexer.Lexer(input);
 
     while (!lexer.eof()) {
       let found = false;
@@ -41,5 +42,10 @@ export namespace TOKENIZER {
     }
 
     return lexer.tokens;
+  }
+
+  export function prepareInput(source: string) {
+    // remove carriage return
+    return String.raw`${source.replace(/\r\n/g, '\n')}`;
   }
 }
