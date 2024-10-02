@@ -1,11 +1,12 @@
 import { Lexer } from './lexer';
+import { PATTERNS } from './patterns';
 import { TOKEN } from './token';
 
 export namespace TOKENIZER {
   export function tokenize(
     source: string,
     options = {
-      patterns: Lexer.ALL_PATTERNS,
+      patterns: PATTERNS.ALL_PATTERNS,
     },
   ) {
     const input = prepareInput(source);

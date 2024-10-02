@@ -1,6 +1,6 @@
 import { describe, expect, onTestFailed, suite, test } from 'vitest';
-import { TOKENIZER } from '../lexer/tokenizer';
 import { TOKEN } from '../lexer/token';
+import { TOKENIZER } from '../lexer/tokenizer';
 import { CONSTANT } from './constants';
 
 describe('Parsing', () => {
