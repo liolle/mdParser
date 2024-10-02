@@ -100,6 +100,71 @@ export namespace TOKEN {
 
       return output;
     }
+
+    compileToHTML(): HTMLElement {
+      const element = document.createElement('div', {});
+      for (const el of this.children) {
+        element.appendChild(el.compileToHTML());
+      }
+      element.textContent = `${this.type} - TODO`;
+      return element;
+    }
+
+    compileToHTMLString(): string {
+      if (this.type != TOKEN_TYPE.ROOT) return `<span>${this.type}TODO</span>`;
+
+      return `<div id="root">\n${this.children
+        .map(val => {
+          return `${val.compileToHTMLString()}\n`;
+        })
+        .join('')}</div>`;
+    }
+  }
+
+  export type HEADING_TYPE =
+    | TOKEN_TYPE.H1
+    | TOKEN_TYPE.H2
+    | TOKEN_TYPE.H3
+    | TOKEN_TYPE.H4
+    | TOKEN_TYPE.H5
+    | TOKEN_TYPE.H6;
+
+  export class Heading extends Token {
+    constructor(type: HEADING_TYPE, body: string, children: Token[]) {
+      super(type, body, children);
+    }
+
+    compileToHTML(): HTMLElement {
+      const element = document.createElement('h1', {});
+      for (const el of this.children) {
+        element.appendChild(el.compileToHTML());
+      }
+      element.textContent = `${this.body}`;
+      return element;
+    }
+
+    compileToHTMLString(): string {
+      const tag = this.type.toLowerCase();
+      return `<${tag}>${this.children.map(val => {
+        return val.compileToHTMLString();
+      })}</${tag}>`;
+    }
+  }
+
+  export class Word extends Token {
+    constructor(body: string, children: Token[]) {
+      super(TOKEN_TYPE.WORD, body, children);
+    }
+
+    compileToHTMLString(): string {
+      if (this.children.length == 0) {
+        return `<span>${this.body}</span>`;
+      }
+
+      return `<div>${this.children.map(val =>
+        val.compileToHTMLString(),
+      )}</div>`;
+    }
   }
 
   export enum LINK_TOKEN_TYPE {
@@ -399,7 +464,11 @@ export namespace TOKEN {
     }
 
     static WORD(body: string) {
-      return new Token(TOKEN.TOKEN_TYPE.WORD, body, []);
+      return new Word(body, []);
+    }
+
+    static WORD_GROUP(body: string, tokens: Token[]) {
+      return new Word(body, tokens);
     }
 
     static LI(body: string, depth = 0) {
