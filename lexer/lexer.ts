@@ -146,6 +146,7 @@ export namespace Lexer {
   export const PARAGRAPH_NESTED_PATTERNS: Pattern[] = [
     //
     PATTERNS.ESCAPE,
+    PATTERNS.INLINE_CODE,
     PATTERNS.EXTERNAL_LINK,
     PATTERNS.BOLD,
     PATTERNS.ITALIC,
@@ -232,7 +233,42 @@ export namespace Lexer {
     }
 
     push(token: TOKEN.Token) {
-      this._tokens.push(token);
+      switch (token.type) {
+        case TOKEN.TOKEN_TYPE.WORD:
+          this._tokens.push(
+            TOKEN.Factory.WORD_GROUP(token.body, token.children),
+          );
+          break;
+        case TOKEN.TOKEN_TYPE.NEW_LINE:
+          this._tokens.push(TOKEN.Factory.NEW_LINE());
+          break;
+
+        case TOKEN.TOKEN_TYPE.PARAGRAPH:
+          this._tokens.push(TOKEN.Factory.PARAGRAPH(token.children));
+          break;
+        case TOKEN.TOKEN_TYPE.BOLD:
+          this._tokens.push(
+            TOKEN.Factory.DECORATION(
+              TOKEN.TOKEN_TYPE.BOLD,
+              token.body,
+              token.children,
+            ),
+          );
+          break;
+        case TOKEN.TOKEN_TYPE.ITALIC:
+          this._tokens.push(
+            TOKEN.Factory.DECORATION(
+              TOKEN.TOKEN_TYPE.ITALIC,
+              token.body,
+              token.children,
+            ),
+          );
+          break;
+
+        default:
+          this._tokens.push(token);
+          break;
+      }
     }
 
     bump(len: number) {
@@ -262,7 +298,7 @@ export namespace Lexer {
 
 function defaultHandler(type: TOKEN.TOKEN_TYPE) {
   return (lexer: Lexer.Lexer, regex: RegExp, raw_value: string) => {
-    lexer.push(new TOKEN.Token(type, raw_value == '\n' ? '' : raw_value, []));
+    lexer.push(TOKEN.Factory.NEW_LINE());
     lexer.bump(raw_value.length);
 
     if (raw_value == '\n') lexer.bumpLine();
@@ -278,7 +314,7 @@ function wordHandler(type: TOKEN.TOKEN_TYPE) {
 
     nestedSearch(Lexer.WORD_NESTED_PATTER, raw_value, type, tokens, word);
 
-    lexer.push(new TOKEN.Token(type, word.word, tokens));
+    lexer.push(new TOKEN.Word(word.word, tokens));
     lexer.bump(raw_value.length);
   };
 }
@@ -289,9 +325,11 @@ function externalLinkHandler(type: TOKEN.TOKEN_TYPE) {
     let offset = 1;
     if (raw_value[0] == '!') offset++;
 
-    const [name, url] = raw_value
-      .slice(offset, raw_value.length - 1)
-      .split('](');
+    const trimmed_value = raw_value.trim();
+
+    const [name, url] = trimmed_value
+      .slice(offset, trimmed_value.length - 1)
+      .split(/\]\s*\(?/);
 
     let next_idx = Infinity;
 
@@ -460,7 +498,9 @@ function headerHandler(type: TOKEN.TOKEN_TYPE, key: string) {
 
     nestedSearch(Lexer.HEADER_NESTED_PATTERNS, body, type, tokens, word);
 
-    lexer.push(new TOKEN.Token(type, word.word, tokens));
+    lexer.push(
+      new TOKEN.Heading(type as TOKEN.HEADING_TYPE, word.word, tokens),
+    );
     lexer.bump(raw_value.length);
 
     return true;
@@ -520,7 +560,7 @@ function nestedSearch(
   if (next_idx != Infinity) {
     const word = body.slice(0, next_idx);
     if (word.length > 0) {
-      tokens.push(new TOKEN.Token(TOKEN.TOKEN_TYPE.WORD, word, []));
+      tokens.push(TOKEN.Factory.WORD(word));
     }
     tokens.push(
       ...TOKENIZER.tokenize(body.slice(next_idx), {
@@ -528,8 +568,7 @@ function nestedSearch(
       }),
     );
   } else {
-    if (type != TOKEN.TOKEN_TYPE.WORD)
-      tokens.push(new TOKEN.Token(TOKEN.TOKEN_TYPE.WORD, body, []));
+    if (type != TOKEN.TOKEN_TYPE.WORD) tokens.push(TOKEN.Factory.WORD(body));
     else {
       options.word += body;
     }

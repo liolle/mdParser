@@ -1,65 +1,35 @@
-import { Lexer } from './lexer/lexer';
+import { readFileSync } from 'fs';
 import { TOKEN } from './lexer/token';
 import { TOKENIZER } from './lexer/tokenizer';
+import { CONSTANT } from './__tests__/constants';
 
 function main() {
-  const source = `
-### Paragraphs :
-
-This is a **paragraph**.
-
-This is another paragraph.
-
-## Special character
-&é"'(){}[]<>§è!çà-^¨$ù%´\`µ£=+~:/.
-
-### Bold, italics, highlights :
-
-**Bold**
-****single star
-
-### Headings :
-
-# This is a heading 1
-
-## This is a heading 2
-
-### This is a heading 3
-
-#### This is a heading 4
- 
-##### This is a heading 5
-
-###### This is a heading 6
-
-### Bold, italics, highlights :
-
-**Bold** and **Bold**
-*Italic* and *Italic*
-~~Strikethrough~~ and ~Strikethrough~~~
-text **Bold text and *nested italic* text**
-***Bold and italic text*** and ***Bold and italic text***
-`;
-
-  const bold_ita_high = `
-### Bold, italics, highlights :
-
-**Bold** and **Bold**
-*Italic* and *Italic*
-~~Strikethrough~~ and ~Strikethrough~~~
-text **Bold text and *nested italic* text**
-***Bold and italic text*** and ***Bold and italic text***
-`;
-
-  const test_str = `# #bonjour
-  # #bonsoir`;
-
   try {
-    const tokens = TOKENIZER.tokenize(test_str);
-    const AST = new TOKEN.Token(TOKEN.TOKEN_TYPE.ROOT, tokens);
-    console.log(TOKEN.displayToken(AST));
+    const root = TOKEN.Factory.ROOT(
+      TOKENIZER.tokenize(
+        String.raw`${readFileSync('example/sample2.md', 'utf-8')}`,
+        // CONSTANT.BaseHeaders,
+      ),
+    );
+    // console.log(root.print());
 
-    // for (const token of tokens) console.log(TOKEN.print(token));
+    console.log(root.compileToHTMLString());
+
+    // console.log(String.raw`${readFileSync('example/sample2.md', 'utf-8')}`);
+    // console.log(readFileSync('example/sample2.md', 'utf-8'));
+    // console.log(
+    //   CONSTANT.CodeBlock2.trim() ==
+    //     String.raw`${readFileSync('example/sample2.md', 'utf-8')}`.trim(),
+    // );
+
+    // console.log(CONSTANT.CodeBlock2.split(''));
+    // console.log(
+    //   String.raw`${readFileSync('example/sample2.md', 'utf-8')}`.split(''),
+    // );
+
+    // console.log(
+    //   TOKEN.Factory.ROOT(TOKENIZER.tokenize(CONSTANT.CodeBlock2)).print(),
+    // );
   } catch (error) {
     console.log(error);
   }

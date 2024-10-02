@@ -110,14 +110,24 @@ export namespace TOKEN {
       return element;
     }
 
-    compileToHTMLString(): string {
-      if (this.type != TOKEN_TYPE.ROOT) return `<span>${this.type}TODO</span>`;
+    compileToHTMLString(indent: number = 0): string {
+      const indentation = ' '.repeat(indent);
+      let output = `${indentation}`;
 
-      return `<div id="root">\n${this.children
-        .map(val => {
-          return `${val.compileToHTMLString()}\n`;
-        })
-        .join('')}</div>`;
+      if (this.type != TOKEN_TYPE.ROOT) {
+        output += `<span>${this.type}TODO</span>`;
+      } else {
+        output += `<div id="root">`;
+        output += '\n';
+        for (const el of this.children) {
+          output += el.compileToHTMLString(indent + TOKEN_DISPLAY_INDENTATION);
+          output += '\n';
+        }
+
+        output += `</div>`;
+        output += '\n';
+      }
+      return output;
     }
   }
 
@@ -143,11 +153,41 @@ export namespace TOKEN {
       return element;
     }
 
-    compileToHTMLString(): string {
+    compileToHTMLString(indent: number = 0): string {
       const tag = this.type.toLowerCase();
-      return `<${tag}>${this.children.map(val => {
-        return val.compileToHTMLString();
-      })}</${tag}>`;
+
+      const indentation = ' '.repeat(indent);
+      let output = `${indentation}`;
+
+      output += `<${tag}>\n`;
+      for (const el of this.children) {
+        output += el.compileToHTMLString(indent + TOKEN_DISPLAY_INDENTATION);
+        output += '\n';
+      }
+      output += indentation;
+      output += `</${tag}>\n`;
+      return output;
+    }
+  }
+
+  export class Paragraph extends Token {
+    constructor(body: string, children: Token[]) {
+      super(TOKEN_TYPE.PARAGRAPH, body, children);
+    }
+
+    compileToHTMLString(indent: number = 0): string {
+      const indentation = ' '.repeat(indent);
+      let output = `${indentation}`;
+
+      output += `<p>\n`;
+      for (const el of this.children) {
+        output += el.compileToHTMLString(indent + TOKEN_DISPLAY_INDENTATION);
+        output += '\n';
+      }
+      output += indentation;
+      output += `</p>\n`;
+
+      return output;
     }
   }
 
@@ -156,14 +196,108 @@ export namespace TOKEN {
       super(TOKEN_TYPE.WORD, body, children);
     }
 
-    compileToHTMLString(): string {
+    compileToHTMLString(indent: number = 0): string {
+      const indentation = ' '.repeat(indent);
+      let output = `${indentation}`;
+
       if (this.children.length == 0) {
-        return `<span>${this.body}</span>`;
+        output += `<span>${this.body}</span>`;
+      } else {
+        output += `<div>\n`;
+        for (const el of this.children) {
+          output += el.compileToHTMLString(indent + TOKEN_DISPLAY_INDENTATION);
+          output += '\n';
+        }
+        output += `</div>\n`;
       }
 
-      return `<div>${this.children.map(val =>
-        val.compileToHTMLString(),
-      )}</div>`;
+      return output;
+    }
+  }
+
+  export type DECORATION_TYPE =
+    | TOKEN_TYPE.BOLD
+    | TOKEN_TYPE.ITALIC
+    | TOKEN_TYPE.HIGHLIGHT
+    | TOKEN_TYPE.STRIKETHROUGH
+    | TOKEN_TYPE.INLINE_CODE;
+
+  export class Decoration extends Token {
+    private _tag = 'span';
+    constructor(type: DECORATION_TYPE, body: string, children: Token[]) {
+      super(type, body, children);
+
+      switch (type) {
+        case TOKEN_TYPE.BOLD:
+          this._tag = 'strong';
+          break;
+        case TOKEN_TYPE.ITALIC:
+          this._tag = 'i';
+          break;
+        case TOKEN_TYPE.HIGHLIGHT:
+          this._tag = 'span class="highlight"';
+          break;
+        case TOKEN_TYPE.STRIKETHROUGH:
+          this._tag = 'strong';
+          break;
+        case TOKEN_TYPE.INLINE_CODE:
+          this._tag = 'code';
+          break;
+
+        default:
+          this._tag = 'span';
+          break;
+      }
+    }
+
+    get tag() {
+      return this._tag;
+    }
+
+    compileToHTMLString(indent: number = 0): string {
+      const indentation = ' '.repeat(indent);
+      let output = `${indentation}`;
+
+      output += `<${this.tag}>\n`;
+      for (const el of this.children) {
+        output += el.compileToHTMLString(indent + TOKEN_DISPLAY_INDENTATION);
+        output += '\n';
+      }
+      output += indentation;
+      output += `</${this.tag}>\n`;
+
+      return output;
+    }
+  }
+
+  export class InlineCode extends Token {
+    constructor(type: DECORATION_TYPE, body: string, children: Token[]) {
+      super(type, body, children);
+    }
+
+    compileToHTMLString(indent: number = 0): string {
+      const indentation = ' '.repeat(indent);
+      let output = `${indentation}`;
+
+      console.log(this);
+
+      output += `<code>${this.body}`;
+
+      output += `</code>\n`;
+
+      return output;
+    }
+  }
+
+  export class NewLine extends Token {
+    constructor() {
+      super(TOKEN_TYPE.NEW_LINE, '', []);
+    }
+
+    compileToHTMLString(indent: number = 0): string {
+      const indentation = ' '.repeat(indent);
+      let output = `${indentation}<div class="new_line"></div>`;
+      return output;
     }
   }
 
@@ -196,6 +330,10 @@ export namespace TOKEN {
       return super.children[0] != undefined;
     }
 
+    get name() {
+      return this.children[0].body;
+    }
+
     get isUrlSet() {
       return super.body != undefined && super.body != '';
     }
@@ -207,6 +345,26 @@ export namespace TOKEN {
       for (const elem of this.children) {
         output += `\n${elem.print(indent + TOKEN_DISPLAY_INDENTATION)}`;
       }
+
+      return output;
+    }
+
+    compileToHTMLString(indent: number = 0): string {
+      const indentation = ' '.repeat(indent);
+      let output = `${indentation}`;
+
+      output += `<a href="${this.body}">`;
+      if (this.kind == 'Image') {
+        output += '\n';
+        output += indentation + ' '.repeat(TOKEN_DISPLAY_INDENTATION);
+        output += `<img src="${this.body}" width="200" style="object-fit: contain;">\n`;
+        output += indentation + ' '.repeat(TOKEN_DISPLAY_INDENTATION);
+        output += `</img>\n`;
+        output += indentation;
+      } else {
+        output += `${this.name}`;
+      }
+      output += `</a>\n`;
 
       return output;
     }
@@ -278,6 +436,27 @@ export namespace TOKEN {
       for (const elem of this.children) {
         output += `\n${elem.print(indent + TOKEN_DISPLAY_INDENTATION)}`;
       }
+      return output;
+    }
+
+    compileToHTMLString(indent: number = 0): string {
+      const indentation = ' '.repeat(indent);
+      let output = `${indentation}`;
+
+      if (this.type == TOKEN_TYPE.LI) {
+        output += `<li>${this.children[0].body}</li>`;
+      } else {
+        output += `<ul>\n`;
+        output += `${this.body}`;
+        for (const elem of this.children) {
+          output += `${elem.compileToHTMLString(
+            indent + TOKEN_DISPLAY_INDENTATION,
+          )}\n`;
+        }
+        output += indentation;
+        output += `</ul>`;
+      }
+
       return output;
     }
   }
@@ -392,6 +571,22 @@ export namespace TOKEN {
     get language() {
       return this._language;
     }
+
+    compileToHTMLString(indent: number = 0): string {
+      const indentation = ' '.repeat(indent);
+      let output = `${indentation}`;
+
+      if (this.type == TOKEN_TYPE.INLINE_CODE) {
+        output += `<code>${this.body}`;
+        output += `</code>\n`;
+      } else {
+        output += `<div class="codeBlock">`;
+        output += `${this.body}`;
+        output += `</div>\n`;
+      }
+
+      return output;
+    }
   }
 
   export function oneOf(type: TOKEN_TYPE, ...types: TOKEN_TYPE[]) {
@@ -460,7 +655,7 @@ export namespace TOKEN {
     constructor() {}
 
     static NEW_LINE() {
-      return new Token(TOKEN.TOKEN_TYPE.NEW_LINE, '', []);
+      return new NewLine();
     }
 
     static WORD(body: string) {
@@ -480,6 +675,10 @@ export namespace TOKEN {
       );
     }
 
+    static PARAGRAPH(tokens: Token[]) {
+      return new Paragraph('', tokens);
+    }
+
     static UL(tokens: Token[], depth = 0) {
       return new ListToken('', tokens, depth, TOKEN.TOKEN_TYPE.UL);
     }
@@ -496,6 +695,10 @@ export namespace TOKEN {
         tokens,
         depth,
       );
+    }
+
+    static DECORATION(type: DECORATION_TYPE, body: string, tokens: Token[]) {
+      return new Decoration(type, body, tokens);
     }
 
     static CHECK_BOX(checked: boolean, body: string, depth = 0) {

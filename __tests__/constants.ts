@@ -45,4 +45,10 @@ Element
 ${'```'} js
 ${code1}
 ${'```'}`;
+
+  export const CodeBlock2 = `${'```'}
+let message = 'Hello world';
+alert(message);
+${'```'}
+`;
 }
