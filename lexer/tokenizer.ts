@@ -1,6 +1,6 @@
+import { TOKEN } from '../token/token';
 import { Lexer } from './lexer';
 import { PATTERNS } from './patterns';
-import { TOKEN } from './token';
 
 export namespace TOKENIZER {
   export function tokenize(

@@ -1,8 +1,9 @@
-import { TOKEN } from './token';
+import { Factory } from '../token/factory';
+import { TOKEN, Token } from '../token/token';
 
 export namespace Lexer {
   export class Lexer {
-    private _tokens: TOKEN.Token[] = [];
+    private _tokens: Token[] = [];
     private offset = 0;
     private source: string;
     private lines = 0;
@@ -11,23 +12,21 @@ export namespace Lexer {
       this.source = source;
     }
 
-    push(token: TOKEN.Token) {
+    push(token: Token) {
       switch (token.type) {
         case TOKEN.TOKEN_TYPE.WORD:
-          this._tokens.push(
-            TOKEN.Factory.WORD_GROUP(token.body, token.children),
-          );
+          this._tokens.push(Factory.WORD_GROUP(token.body, token.children));
           break;
         case TOKEN.TOKEN_TYPE.NEW_LINE:
-          this._tokens.push(TOKEN.Factory.NEW_LINE());
+          this._tokens.push(Factory.NEW_LINE());
           break;
 
         case TOKEN.TOKEN_TYPE.PARAGRAPH:
-          this._tokens.push(TOKEN.Factory.PARAGRAPH(token.children));
+          this._tokens.push(Factory.PARAGRAPH(token.children));
           break;
         case TOKEN.TOKEN_TYPE.BOLD:
           this._tokens.push(
-            TOKEN.Factory.DECORATION(
+            Factory.DECORATION(
               TOKEN.TOKEN_TYPE.BOLD,
               token.body,
               token.children,
@@ -36,7 +35,7 @@ export namespace Lexer {
           break;
         case TOKEN.TOKEN_TYPE.ITALIC:
           this._tokens.push(
-            TOKEN.Factory.DECORATION(
+            Factory.DECORATION(
               TOKEN.TOKEN_TYPE.ITALIC,
               token.body,
               token.children,

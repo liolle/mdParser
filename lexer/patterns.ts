@@ -1,6 +1,6 @@
+import { TOKEN } from '../token/token';
 import { HANDLERS } from './handlers';
 import { Lexer } from './lexer';
-import { TOKEN } from './token';
 
 export type Pattern = {
   regex: () => RegExp;
