@@ -1,4 +1,4 @@
-import { CodeToken, SUPPORTED_LANGUAGES } from './code';
+import { CodeToken, InlineCode, SUPPORTED_LANGUAGES } from './code';
 import { DECORATION_TYPE, Decoration } from './decoration';
 import { CheckBoxToken, ListToken } from './list';
 import { NewLine } from './newline';
@@ -62,11 +62,7 @@ export class Factory {
   }
 
   static INLINE_CODE(body: string) {
-    return new CodeToken(
-      TOKEN.TOKEN_TYPE.INLINE_CODE,
-      body,
-      SUPPORTED_LANGUAGES.DEFAULT,
-    );
+    return new InlineCode(body);
   }
 
   static CODE_BLOCK(body: string, language: SUPPORTED_LANGUAGES) {

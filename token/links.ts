@@ -12,7 +12,7 @@ export class LinkToken extends Token {
     children: Token[],
     kind: LINK_TOKEN_TYPE = LINK_TOKEN_TYPE.DEFAULT,
   ) {
-    super(TOKEN.TOKEN_TYPE.EXTERNAL_LINK, body, children || []);
+    super(TOKEN.TOKEN_TYPE.EXTERNAL_LINK, body, children);
     this._kind = kind;
   }
 

@@ -35,8 +35,7 @@ export class ListToken extends Token {
     }
 
     const n = token.children.length;
-    for (const t of token.children) {
-    }
+
     let i = 0;
     for (; i < n; i++) {
       if (token.children[i].type != TOKEN.TOKEN_TYPE.WORD) break;
@@ -116,9 +115,7 @@ class NestedList {
     }
 
     const new_node = this.#getNestedNode(body, depth);
-
     node.pushToChildren(new_node);
-
     this._stack.push(new_node);
     this._token.setLastModified(node);
   }
@@ -159,7 +156,6 @@ export class ListTokenBuilder {
   }
 
   pushElement(raw_value: string) {
-    // count depth
     if (raw_value == '') return;
     const [spaces, body] = raw_value.split('- ');
     let depth = (spaces ? spaces.length : 0) + 1;

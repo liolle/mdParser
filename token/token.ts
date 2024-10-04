@@ -39,14 +39,6 @@ export namespace TOKEN {
 
   export const TOKEN_DISPLAY_INDENTATION = 4;
 
-  export type HEADING_TYPE =
-    | TOKEN_TYPE.H1
-    | TOKEN_TYPE.H2
-    | TOKEN_TYPE.H3
-    | TOKEN_TYPE.H4
-    | TOKEN_TYPE.H5
-    | TOKEN_TYPE.H6;
-
   export function oneOf(type: TOKEN_TYPE, ...types: TOKEN_TYPE[]) {
     for (const t of types) if (t == type) return true;
     return false;

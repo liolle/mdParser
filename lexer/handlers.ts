@@ -1,6 +1,6 @@
 import { resolveLanguage } from '../token/code';
 import { Factory } from '../token/factory';
-import { Heading } from '../token/heading';
+import { Heading, HEADING_TYPE } from '../token/heading';
 import { LinkToken, LINK_TOKEN_TYPE } from '../token/links';
 import { ListToken, ListTokenBuilder } from '../token/list';
 import { Token, TOKEN } from '../token/token';
@@ -214,7 +214,7 @@ export namespace HANDLERS {
 
       nestedSearch(PATTERNS.HEADER_NESTED_PATTERNS, body, type, tokens, word);
 
-      lexer.push(new Heading(type as TOKEN.HEADING_TYPE, word.word, tokens));
+      lexer.push(new Heading(type as HEADING_TYPE, word.word, tokens));
       lexer.bump(raw_value.length);
 
       return true;
