@@ -9,147 +9,171 @@ import { LinkToken, LINK_TOKEN_TYPE } from '../token/links';
 describe('Parsing', () => {
   suite('Base case', () => {
     test('H1', () => {
-      const tokens = TOKENIZER.tokenize('# This is a heading 1');
-
-      const expected_token = new Token(TOKEN.TOKEN_TYPE.H1, '', [
-        new Token(TOKEN.TOKEN_TYPE.WORD, 'This is a heading 1', []),
+      const actual = Factory.ROOT(TOKENIZER.tokenize('# This is a heading 1'));
+      const expected = Factory.ROOT([
+        Factory.HEADING('This is a heading 1', 1, []),
       ]);
 
-      expect(tokens).toHaveLength(1);
-      expect(tokens[0].print()).toEqual(expected_token.print());
+      onTestFailed(e => {
+        expect(actual.print()).toEqual(expected.print());
+      });
+
+      expect(actual.equal(expected)).toEqual(true);
     });
     test('H6', () => {
-      const tokens = TOKENIZER.tokenize('###### This is a heading 6');
-
-      const expected_token = new Token(TOKEN.TOKEN_TYPE.H6, '', [
-        new Token(TOKEN.TOKEN_TYPE.WORD, 'This is a heading 6', []),
+      const actual = Factory.ROOT(
+        TOKENIZER.tokenize('###### This is a heading 6'),
+      );
+      const expected = Factory.ROOT([
+        Factory.HEADING('This is a heading 6', 6, []),
       ]);
 
-      expect(tokens).toHaveLength(1);
-      expect(tokens[0].print()).toEqual(expected_token.print());
+      onTestFailed(e => {
+        expect(actual.print()).toEqual(expected.print());
+      });
+
+      expect(actual.equal(expected)).toEqual(true);
     });
 
     test('H1...H6', () => {
-      const tokens = TOKENIZER.tokenize(CONSTANT.BaseHeaders);
-      const types = [
-        //
-        TOKEN.TOKEN_TYPE.H1,
-        TOKEN.TOKEN_TYPE.H2,
-        TOKEN.TOKEN_TYPE.H3,
-        TOKEN.TOKEN_TYPE.H4,
-        TOKEN.TOKEN_TYPE.H5,
-        TOKEN.TOKEN_TYPE.H6,
-      ];
+      const actual = Factory.ROOT(TOKENIZER.tokenize(CONSTANT.BaseHeaders));
 
-      expect(tokens).toHaveLength(6);
-      for (let i = 0; i < 6; i++) {
-        const expected_token = new Token(types[i], '', [
-          new Token(TOKEN.TOKEN_TYPE.WORD, `This is a heading ${i + 1}`, []),
-        ]);
-        expect(tokens[i].print()).toEqual(expected_token.print());
-      }
+      const expected = Factory.ROOT([
+        Factory.HEADING('This is a heading 1', 1, []),
+        Factory.HEADING('This is a heading 2', 2, []),
+        Factory.HEADING('This is a heading 3', 3, []),
+        Factory.HEADING('This is a heading 4', 4, []),
+        Factory.HEADING('This is a heading 5', 5, []),
+        Factory.HEADING('This is a heading 6', 6, []),
+      ]);
+
+      onTestFailed(e => {
+        expect(actual.print()).toEqual(expected.print());
+      });
+
+      expect(actual.equal(expected)).toEqual(true);
     });
 
     test('Bold', () => {
-      const tokens = TOKENIZER.tokenize('**Bold**');
-
-      const expected_token = new Token(TOKEN.TOKEN_TYPE.BOLD, '', [
-        new Token(TOKEN.TOKEN_TYPE.WORD, 'Bold', []),
+      const actual = Factory.ROOT(TOKENIZER.tokenize('**Bold**'));
+      const expected = Factory.ROOT([
+        Factory.DECORATION(TOKEN.TOKEN_TYPE.BOLD, '', [Factory.WORD('Bold')]),
       ]);
 
-      expect(tokens).toHaveLength(1);
-      expect(tokens[0].print()).toEqual(expected_token.print());
+      onTestFailed(e => {
+        expect(actual.print()).toEqual(expected.print());
+      });
+
+      expect(actual.equal(expected)).toEqual(true);
     });
 
     test('Italic', () => {
-      const tokens = TOKENIZER.tokenize('_Italic_');
-
-      const expected_token = new Token(TOKEN.TOKEN_TYPE.ITALIC, '', [
-        new Token(TOKEN.TOKEN_TYPE.WORD, 'Italic', []),
+      const actual = Factory.ROOT(TOKENIZER.tokenize('_Italic_'));
+      const expected = Factory.ROOT([
+        Factory.DECORATION(TOKEN.TOKEN_TYPE.ITALIC, '', [
+          Factory.WORD('Italic'),
+        ]),
       ]);
 
-      expect(tokens).toHaveLength(1);
-      expect(tokens[0].print()).toEqual(expected_token.print());
+      onTestFailed(e => {
+        expect(actual.print()).toEqual(expected.print());
+      });
+
+      expect(actual.equal(expected)).toEqual(true);
     });
 
     test('StrikeThrough', () => {
-      const tokens = TOKENIZER.tokenize('~~Strikethrough~~');
-
-      const expected_token = new Token(TOKEN.TOKEN_TYPE.STRIKETHROUGH, '', [
-        new Token(TOKEN.TOKEN_TYPE.WORD, 'Strikethrough', []),
+      const actual = Factory.ROOT(TOKENIZER.tokenize('~~Strikethrough~~'));
+      const expected = Factory.ROOT([
+        Factory.DECORATION(TOKEN.TOKEN_TYPE.STRIKETHROUGH, '', [
+          Factory.WORD('Strikethrough'),
+        ]),
       ]);
 
-      expect(tokens).toHaveLength(1);
-      expect(tokens[0].print()).toEqual(expected_token.print());
+      onTestFailed(e => {
+        expect(actual.print()).toEqual(expected.print());
+      });
+
+      expect(actual.equal(expected)).toEqual(true);
     });
 
     test('Highlight', () => {
-      const tokens = TOKENIZER.tokenize('==Highlight==');
-
-      const expected_token = new Token(TOKEN.TOKEN_TYPE.HIGHLIGHT, '', [
-        new Token(TOKEN.TOKEN_TYPE.WORD, 'Highlight', []),
+      const actual = Factory.ROOT(TOKENIZER.tokenize('==Highlight=='));
+      const expected = Factory.ROOT([
+        Factory.DECORATION(TOKEN.TOKEN_TYPE.HIGHLIGHT, '', [
+          Factory.WORD('Highlight'),
+        ]),
       ]);
 
-      expect(tokens).toHaveLength(1);
-      expect(tokens[0].print()).toEqual(expected_token.print());
+      onTestFailed(e => {
+        expect(actual.print()).toEqual(expected.print());
+      });
+
+      expect(actual.equal(expected)).toEqual(true);
     });
 
     test('Paragraph', () => {
-      const tokens = TOKENIZER.tokenize('This is a paragraph.\n');
-
-      const expected_token = new Token(TOKEN.TOKEN_TYPE.PARAGRAPH, '', [
-        new Token(TOKEN.TOKEN_TYPE.WORD, 'This is a paragraph.', []),
+      const actual = Factory.ROOT(TOKENIZER.tokenize('This is a paragraph.\n'));
+      const expected = Factory.ROOT([
+        Factory.PARAGRAPH([Factory.WORD('This is a paragraph.')]),
       ]);
 
-      expect(tokens).toHaveLength(1);
-      expect(tokens[0].print()).toEqual(expected_token.print());
+      onTestFailed(e => {
+        expect(actual.print()).toEqual(expected.print());
+      });
+
+      expect(actual.equal(expected)).toEqual(true);
     });
 
     test('Special characters', () => {
-      const tokens = TOKENIZER.tokenize(
-        String.raw`&é"'()*\/_{}[]§è!çà-^¨$ù%´\`µ£=+~`,
+      const actual = Factory.ROOT(
+        TOKENIZER.tokenize(String.raw`&é"'()*\/_{}[]§è!çà-^¨$ù%´\`µ£=+~`),
       );
 
-      const expected_token = new Token(TOKEN.TOKEN_TYPE.ROOT, '', [
-        new Token(TOKEN.TOKEN_TYPE.WORD, `&é"'()*`, []),
-        new Token(TOKEN.TOKEN_TYPE.ESCAPE, `/`, []),
-        new Token(TOKEN.TOKEN_TYPE.WORD, `_{}[]§è!çà-^¨$ù%´`, []),
-        new Token(TOKEN.TOKEN_TYPE.ESCAPE, '`', []),
-        new Token(TOKEN.TOKEN_TYPE.WORD, `µ£=+~`, []),
+      const expected = Factory.ROOT([
+        Factory.WORD(`&é"'()*`),
+        Factory.ESCAPE('/'),
+        Factory.WORD(`_{}[]§è!çà-^¨$ù%´`),
+        Factory.ESCAPE('`'),
+        Factory.WORD(`µ£=+~`),
       ]);
 
-      expect(tokens).toHaveLength(5);
-      expect(new Token(TOKEN.TOKEN_TYPE.ROOT, '', tokens).print()).toEqual(
-        expected_token.print(),
-      );
+      onTestFailed(e => {
+        expect(actual.print()).toEqual(expected.print());
+      });
+
+      expect(actual.equal(expected)).toEqual(true);
     });
 
     test('Escaped character 1', () => {
-      const tokens = TOKENIZER.tokenize(String.raw`\n`);
+      const actual = Factory.ROOT(TOKENIZER.tokenize(String.raw`\n`));
+      const expected = Factory.ROOT([Factory.ESCAPE('n')]);
 
-      const expected_token = new Token(TOKEN.TOKEN_TYPE.ESCAPE, 'n', []);
+      onTestFailed(e => {
+        expect(actual.print()).toEqual(expected.print());
+      });
 
-      expect(tokens).toHaveLength(1);
-      expect(tokens[0].print()).toEqual(expected_token.print());
+      expect(actual.equal(expected)).toEqual(true);
     });
 
     test('Escaped character 2', () => {
-      const tokens = TOKENIZER.tokenize(
-        String.raw`\*\*This line will not be bold\*\*`,
+      const actual = Factory.ROOT(
+        TOKENIZER.tokenize(String.raw`\*\*This line will not be bold\*\*`),
       );
 
-      const expected_token = new Token(TOKEN.TOKEN_TYPE.ROOT, '', [
-        new Token(TOKEN.TOKEN_TYPE.ESCAPE, `*`, []),
-        new Token(TOKEN.TOKEN_TYPE.ESCAPE, `*`, []),
-        new Token(TOKEN.TOKEN_TYPE.WORD, `This line will not be bold`, []),
-        new Token(TOKEN.TOKEN_TYPE.ESCAPE, '*', []),
-        new Token(TOKEN.TOKEN_TYPE.ESCAPE, `*`, []),
+      const expected = Factory.ROOT([
+        Factory.ESCAPE('*'),
+        Factory.ESCAPE('*'),
+        Factory.WORD(`This line will not be bold`),
+        Factory.ESCAPE('*'),
+        Factory.ESCAPE('*'),
       ]);
 
-      expect(tokens).toHaveLength(5);
-      expect(new Token(TOKEN.TOKEN_TYPE.ROOT, '', tokens).print()).toEqual(
-        expected_token.print(),
-      );
+      onTestFailed(e => {
+        expect(actual.print()).toEqual(expected.print());
+      });
+
+      expect(actual.equal(expected)).toEqual(true);
     });
 
     test('Escaped character 3', () => {
@@ -173,179 +197,203 @@ describe('Parsing', () => {
 
   suite('Nested', () => {
     test('Italic in Bold', () => {
-      const tokens = TOKENIZER.tokenize(
-        '**Bold text and _nested italic_ text**',
+      const actual = Factory.ROOT(
+        TOKENIZER.tokenize('**Bold text and _nested italic_ text**'),
       );
 
-      const expected_token = new Token(TOKEN.TOKEN_TYPE.BOLD, '', [
-        new Token(TOKEN.TOKEN_TYPE.WORD, 'Bold text and ', []),
-        new Token(TOKEN.TOKEN_TYPE.ITALIC, '', [
-          new Token(TOKEN.TOKEN_TYPE.WORD, 'nested italic', []),
+      const expected = Factory.ROOT([
+        Factory.DECORATION(TOKEN.TOKEN_TYPE.BOLD, '', [
+          Factory.WORD('Bold text and '),
+          Factory.DECORATION(TOKEN.TOKEN_TYPE.ITALIC, '', [
+            Factory.WORD('nested italic'),
+          ]),
+          Factory.WORD(' text'),
         ]),
-        new Token(TOKEN.TOKEN_TYPE.WORD, ' text', []),
       ]);
 
-      expect(tokens).toHaveLength(1);
-      expect(tokens[0].print()).toEqual(expected_token.print());
+      onTestFailed(e => {
+        expect(actual.print()).toEqual(expected.print());
+      });
+
+      expect(actual.equal(expected)).toEqual(true);
     });
 
     test('Bold in Italic', () => {
-      const tokens = TOKENIZER.tokenize(
-        '_Italic text and **nested Bold** text_',
+      const actual = Factory.ROOT(
+        TOKENIZER.tokenize('_Italic text and **nested Bold** text_'),
       );
 
-      const expected_token = new Token(TOKEN.TOKEN_TYPE.ITALIC, '', [
-        new Token(TOKEN.TOKEN_TYPE.WORD, 'Italic text and ', []),
-        new Token(TOKEN.TOKEN_TYPE.BOLD, '', [
-          new Token(TOKEN.TOKEN_TYPE.WORD, 'nested Bold', []),
+      const expected = Factory.ROOT([
+        Factory.DECORATION(TOKEN.TOKEN_TYPE.ITALIC, '', [
+          Factory.WORD('Italic text and '),
+          Factory.DECORATION(TOKEN.TOKEN_TYPE.BOLD, '', [
+            Factory.WORD('nested Bold'),
+          ]),
+          Factory.WORD(' text'),
         ]),
-        new Token(TOKEN.TOKEN_TYPE.WORD, ' text', []),
       ]);
 
-      expect(tokens).toHaveLength(1);
-      expect(tokens[0].print()).toEqual(expected_token.print());
+      onTestFailed(e => {
+        expect(actual.print()).toEqual(expected.print());
+      });
+
+      expect(actual.equal(expected)).toEqual(true);
     });
 
     test('Nested in header', () => {
-      const tokens = TOKENIZER.tokenize(
-        '### ~~**Bold text and _nested italic_ text in heading and strike**~~',
+      const actual = Factory.ROOT(
+        TOKENIZER.tokenize(
+          '### ~~**Bold text and _nested italic_ text in heading and strike**~~',
+        ),
       );
 
-      const expected_token = new Token(TOKEN.TOKEN_TYPE.H3, '', [
-        new Token(TOKEN.TOKEN_TYPE.STRIKETHROUGH, '', [
-          new Token(TOKEN.TOKEN_TYPE.BOLD, '', [
-            new Token(TOKEN.TOKEN_TYPE.WORD, 'Bold text and ', []),
-            new Token(TOKEN.TOKEN_TYPE.ITALIC, '', [
-              new Token(TOKEN.TOKEN_TYPE.WORD, 'nested italic', []),
+      const expected = Factory.ROOT([
+        Factory.HEADING('', 3, [
+          Factory.DECORATION(TOKEN.TOKEN_TYPE.STRIKETHROUGH, '', [
+            Factory.DECORATION(TOKEN.TOKEN_TYPE.BOLD, '', [
+              Factory.WORD('Bold text and '),
+              Factory.DECORATION(TOKEN.TOKEN_TYPE.ITALIC, '', [
+                Factory.WORD('nested italic'),
+              ]),
+              Factory.WORD(' text in heading and strike'),
             ]),
-            new Token(TOKEN.TOKEN_TYPE.WORD, ' text in heading and strike', []),
           ]),
         ]),
       ]);
 
-      expect(tokens).toHaveLength(1);
-      expect(tokens[0].print()).toEqual(expected_token.print());
+      onTestFailed(e => {
+        expect(actual.print()).toEqual(expected.print());
+      });
+
+      expect(actual.equal(expected)).toEqual(true);
     });
 
     test('Header External_link', () => {
-      const tokens = TOKENIZER.tokenize(
-        `## Link in header ![Crafty](${CONSTANT.SampleImage1})`,
-      );
-      const expected_token = new Token(TOKEN.TOKEN_TYPE.H2, '', [
-        new Token(TOKEN.TOKEN_TYPE.WORD, `Link in header `, []),
-        new LinkToken(
-          `${CONSTANT.SampleImage1}`,
-          [new Token(TOKEN.TOKEN_TYPE.WORD, `Crafty`, [])],
-          LINK_TOKEN_TYPE.IMAGE,
+      const actual = Factory.ROOT(
+        TOKENIZER.tokenize(
+          `## Link in header ![Crafty](${CONSTANT.SampleImage1})`,
         ),
+      );
+
+      const expected = Factory.ROOT([
+        Factory.HEADING('', 2, [
+          Factory.WORD('Link in header '),
+          Factory.IMAGE_LINK(CONSTANT.SampleImage1, 'Crafty'),
+        ]),
       ]);
 
-      expect(tokens).toHaveLength(1);
-      expect(tokens[0].print()).toEqual(expected_token.print());
+      onTestFailed(e => {
+        expect(actual.print()).toEqual(expected.print());
+      });
+
+      expect(actual.equal(expected)).toEqual(true);
     });
   });
 
   suite('Links', () => {
     test('External link (no name)', () => {
-      const tokens = TOKENIZER.tokenize('[](https://github.com/liolle/Crafty)');
-      const expected_token = new LinkToken(
-        'https://github.com/liolle/Crafty',
-        [],
+      const actual = Factory.ROOT(
+        TOKENIZER.tokenize('[](https://github.com/liolle/Crafty)'),
       );
-
-      expect(tokens).toHaveLength(1);
-      expect(tokens[0]).toBeInstanceOf(LinkToken);
-      expect((tokens[0] as LinkToken).kind).toEqual(LINK_TOKEN_TYPE.DEFAULT);
-      expect(tokens[0].print()).toEqual(expected_token.print());
-    });
-    test('External link (no url)', () => {
-      const tokens = TOKENIZER.tokenize('[Crafty]()');
-      const expected_token = new LinkToken('', [
-        new Token(TOKEN.TOKEN_TYPE.WORD, `Crafty`, []),
+      const expected = Factory.ROOT([
+        Factory.LINK('https://github.com/liolle/Crafty', ''),
       ]);
 
-      expect(tokens).toHaveLength(1);
-      expect(tokens[0]).toBeInstanceOf(LinkToken);
-      expect((tokens[0] as LinkToken).kind).toEqual(LINK_TOKEN_TYPE.DEFAULT);
-      expect(tokens[0].print()).toEqual(expected_token.print());
+      onTestFailed(e => {
+        expect(actual.print()).toEqual(expected.print());
+      });
+
+      expect(actual.equal(expected)).toEqual(true);
+    });
+    test('External link (no url)', () => {
+      const actual = Factory.ROOT(TOKENIZER.tokenize('[Crafty]()'));
+      const expected = Factory.ROOT([Factory.LINK('', 'Crafty')]);
+
+      onTestFailed(e => {
+        expect(actual.print()).toEqual(expected.print());
+      });
+
+      expect(actual.equal(expected)).toEqual(true);
     });
 
     test('External link', () => {
-      const tokens = TOKENIZER.tokenize(
-        '[Crafty](https://github.com/liolle/Crafty)',
+      const actual = Factory.ROOT(
+        TOKENIZER.tokenize('[Crafty](https://github.com/liolle/Crafty)'),
       );
-      const expected_token = new LinkToken('https://github.com/liolle/Crafty', [
-        new Token(TOKEN.TOKEN_TYPE.WORD, `Crafty`, []),
+      const expected = Factory.ROOT([
+        Factory.LINK('https://github.com/liolle/Crafty', 'Crafty'),
       ]);
 
-      expect(tokens).toHaveLength(1);
-      expect(tokens[0]).toBeInstanceOf(LinkToken);
-      expect((tokens[0] as LinkToken).kind).toEqual(LINK_TOKEN_TYPE.DEFAULT);
-      expect(tokens[0].print()).toEqual(expected_token.print());
+      onTestFailed(e => {
+        expect(actual.print()).toEqual(expected.print());
+      });
+
+      expect(actual.equal(expected)).toEqual(true);
     });
 
     test('External link (no name & no url)', () => {
-      const tokens = TOKENIZER.tokenize('[]()');
-      const expected_token = new LinkToken('', [], LINK_TOKEN_TYPE.IMAGE);
+      const actual = Factory.ROOT(TOKENIZER.tokenize('[]()'));
+      const expected = Factory.ROOT([Factory.LINK('', '')]);
 
-      expect(tokens).toHaveLength(1);
-      expect(tokens[0]).toBeInstanceOf(LinkToken);
-      expect((tokens[0] as LinkToken).kind).toEqual(LINK_TOKEN_TYPE.DEFAULT);
-      expect(tokens[0].print()).toEqual(expected_token.print());
+      onTestFailed(e => {
+        expect(actual.print()).toEqual(expected.print());
+      });
+
+      expect(actual.equal(expected)).toEqual(true);
     });
 
     // Images
 
     test('External image (no name)', () => {
-      const tokens = TOKENIZER.tokenize(`![](${CONSTANT.SampleImage1})`);
-      const expected_token = new LinkToken(
-        String.raw`${CONSTANT.SampleImage1}`,
-        [],
-        LINK_TOKEN_TYPE.IMAGE,
+      const actual = Factory.ROOT(
+        TOKENIZER.tokenize(`![](${CONSTANT.SampleImage1})`),
       );
+      const expected = Factory.ROOT([
+        Factory.IMAGE_LINK(CONSTANT.SampleImage1, ''),
+      ]);
 
-      expect(tokens).toHaveLength(1);
-      expect(tokens[0]).toBeInstanceOf(LinkToken);
-      expect((tokens[0] as LinkToken).kind).toEqual(LINK_TOKEN_TYPE.IMAGE);
-      expect(tokens[0].print()).toEqual(expected_token.print());
+      onTestFailed(e => {
+        expect(actual.print()).toEqual(expected.print());
+      });
+
+      expect(actual.equal(expected)).toEqual(true);
     });
 
     test('External image (no url)', () => {
-      const tokens = TOKENIZER.tokenize('![Crafty]()');
-      const expected_token = new LinkToken(
-        '',
-        [new Token(TOKEN.TOKEN_TYPE.WORD, `Crafty`, [])],
-        LINK_TOKEN_TYPE.IMAGE,
-      );
+      const actual = Factory.ROOT(TOKENIZER.tokenize(`![Crafty]()`));
+      const expected = Factory.ROOT([Factory.IMAGE_LINK('', 'Crafty')]);
 
-      expect(tokens).toHaveLength(1);
-      expect(tokens[0]).toBeInstanceOf(LinkToken);
-      expect((tokens[0] as LinkToken).kind).toEqual(LINK_TOKEN_TYPE.IMAGE);
-      expect(tokens[0].print()).toEqual(expected_token.print());
+      onTestFailed(e => {
+        expect(actual.print()).toEqual(expected.print());
+      });
+
+      expect(actual.equal(expected)).toEqual(true);
     });
 
     test('External image', () => {
-      const tokens = TOKENIZER.tokenize(`![Crafty](${CONSTANT.SampleImage1})`);
-      const expected_token = new LinkToken(
-        String.raw`${CONSTANT.SampleImage1}`,
-        [new Token(TOKEN.TOKEN_TYPE.WORD, `Crafty`, [])],
-        LINK_TOKEN_TYPE.IMAGE,
+      const actual = Factory.ROOT(
+        TOKENIZER.tokenize(`![Crafty](${CONSTANT.SampleImage1})`),
       );
+      const expected = Factory.ROOT([
+        Factory.IMAGE_LINK(CONSTANT.SampleImage1, 'Crafty'),
+      ]);
 
-      expect(tokens).toHaveLength(1);
-      expect(tokens[0]).toBeInstanceOf(LinkToken);
-      expect((tokens[0] as LinkToken).kind).toEqual(LINK_TOKEN_TYPE.IMAGE);
-      expect(tokens[0].print()).toEqual(expected_token.print());
+      onTestFailed(e => {
+        expect(actual.print()).toEqual(expected.print());
+      });
+
+      expect(actual.equal(expected)).toEqual(true);
     });
 
     test('External image (no name & no url)', () => {
-      const tokens = TOKENIZER.tokenize('![]()');
-      const expected_token = new LinkToken('', [], LINK_TOKEN_TYPE.IMAGE);
+      const actual = Factory.ROOT(TOKENIZER.tokenize(`![]()`));
+      const expected = Factory.ROOT([Factory.IMAGE_LINK('', '')]);
 
-      expect(tokens).toHaveLength(1);
-      expect(tokens[0]).toBeInstanceOf(LinkToken);
-      expect((tokens[0] as LinkToken).kind).toEqual(LINK_TOKEN_TYPE.IMAGE);
-      expect(tokens[0].print()).toEqual(expected_token.print());
+      onTestFailed(e => {
+        expect(actual.print()).toEqual(expected.print());
+      });
+
+      expect(actual.equal(expected)).toEqual(true);
     });
   });
 

@@ -1,10 +1,36 @@
 import { CodeToken, InlineCode, SUPPORTED_LANGUAGES } from './code';
 import { DECORATION_TYPE, Decoration } from './decoration';
+import { LinkToken, LINK_TOKEN_TYPE } from './links';
 import { CheckBoxToken, ListToken } from './list';
-import { NewLine, Paragraph, Token, TOKEN, Word } from './token';
+import {
+  Heading,
+  HEADING_TYPE,
+  NewLine,
+  Paragraph,
+  Token,
+  TOKEN,
+  Word,
+} from './token';
 
 export class Factory {
   constructor() {}
+
+  static HEADING(body: string, size: number, tokens: Token[]) {
+    if (tokens.length == 0) {
+      return new Heading(
+        (TOKEN.TOKEN_TYPE_HEADERS[size - 1] ||
+          TOKEN.TOKEN_TYPE.H6) as HEADING_TYPE,
+        '',
+        [Factory.WORD(body)],
+      );
+    }
+    return new Heading(
+      (TOKEN.TOKEN_TYPE_HEADERS[size - 1] ||
+        TOKEN.TOKEN_TYPE.H6) as HEADING_TYPE,
+      '',
+      tokens,
+    );
+  }
 
   static NEW_LINE() {
     return new NewLine();
@@ -72,5 +98,19 @@ export class Factory {
 
   static ESCAPE(character: string) {
     return new Token(TOKEN.TOKEN_TYPE.ESCAPE, character.slice(0, 1), []);
+  }
+
+  static IMAGE_LINK(link: string, name: string) {
+    if (name != '') {
+      return new LinkToken(link, [Factory.WORD(name)], LINK_TOKEN_TYPE.IMAGE);
+    }
+    return new LinkToken(link, [], LINK_TOKEN_TYPE.IMAGE);
+  }
+
+  static LINK(link: string, name: string) {
+    if (name != '') {
+      return new LinkToken(link, [Factory.WORD(name)], LINK_TOKEN_TYPE.DEFAULT);
+    }
+    return new LinkToken(link, [], LINK_TOKEN_TYPE.DEFAULT);
   }
 }
