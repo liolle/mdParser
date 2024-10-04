@@ -1,10 +1,7 @@
 import { CodeToken, InlineCode, SUPPORTED_LANGUAGES } from './code';
 import { DECORATION_TYPE, Decoration } from './decoration';
 import { CheckBoxToken, ListToken } from './list';
-import { NewLine } from './newline';
-import { Paragraph } from './paragraph';
-import { Token, TOKEN } from './token';
-import { Word } from './word';
+import { NewLine, Paragraph, Token, TOKEN, Word } from './token';
 
 export class Factory {
   constructor() {}

@@ -1,10 +1,8 @@
 import { resolveLanguage } from '../token/code';
 import { Factory } from '../token/factory';
-import { Heading, HEADING_TYPE } from '../token/heading';
 import { LinkToken, LINK_TOKEN_TYPE } from '../token/links';
 import { ListToken, ListTokenBuilder } from '../token/list';
-import { Token, TOKEN } from '../token/token';
-import { Word } from '../token/word';
+import { Heading, HEADING_TYPE, Token, TOKEN, Word } from '../token/token';
 import { Lexer } from './lexer';
 import { Pattern, PATTERNS } from './patterns';
 import { TOKENIZER } from './tokenizer';

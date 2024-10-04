@@ -42,24 +42,4 @@ export class LinkToken extends Token {
 
     return output;
   }
-
-  compileToHTMLString(indent: number = 0): string {
-    const indentation = ' '.repeat(indent);
-    let output = `${indentation}`;
-
-    output += `<a href="${this.body}">`;
-    if (this.kind == 'Image') {
-      output += '\n';
-      output += indentation + ' '.repeat(TOKEN.TOKEN_DISPLAY_INDENTATION);
-      output += `<img src="${this.body}" width="200" style="object-fit: contain;">\n`;
-      output += indentation + ' '.repeat(TOKEN.TOKEN_DISPLAY_INDENTATION);
-      output += `</img>\n`;
-      output += indentation;
-    } else {
-      output += `${this.name}`;
-    }
-    output += `</a>\n`;
-
-    return output;
-  }
 }

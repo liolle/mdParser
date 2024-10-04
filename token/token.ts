@@ -110,35 +110,34 @@ export class Token {
 
     return output;
   }
+}
 
-  compileToHTML(): HTMLElement {
-    const element = document.createElement('div', {});
-    for (const el of this.children) {
-      element.appendChild(el.compileToHTML());
-    }
-    element.textContent = `${this.type} - TODO`;
-    return element;
+export class Word extends Token {
+  constructor(body: string, children: Token[]) {
+    super(TOKEN.TOKEN_TYPE.WORD, body, children);
   }
+}
+export class Paragraph extends Token {
+  constructor(body: string, children: Token[]) {
+    super(TOKEN.TOKEN_TYPE.PARAGRAPH, body, children);
+  }
+}
 
-  compileToHTMLString(indent: number = 0): string {
-    const indentation = ' '.repeat(indent);
-    let output = `${indentation}`;
+export class NewLine extends Token {
+  constructor() {
+    super(TOKEN.TOKEN_TYPE.NEW_LINE, '', []);
+  }
+}
+export type HEADING_TYPE =
+  | TOKEN.TOKEN_TYPE.H1
+  | TOKEN.TOKEN_TYPE.H2
+  | TOKEN.TOKEN_TYPE.H3
+  | TOKEN.TOKEN_TYPE.H4
+  | TOKEN.TOKEN_TYPE.H5
+  | TOKEN.TOKEN_TYPE.H6;
 
-    if (this.type != TOKEN.TOKEN_TYPE.ROOT) {
-      output += `<span>${this.type}TODO</span>`;
-    } else {
-      output += `<div id="root">`;
-      output += '\n';
-      for (const el of this.children) {
-        output += el.compileToHTMLString(
-          indent + TOKEN.TOKEN_DISPLAY_INDENTATION,
-        );
-        output += '\n';
-      }
-
-      output += `</div>`;
-      output += '\n';
-    }
-    return output;
+export class Heading extends Token {
+  constructor(type: HEADING_TYPE, body: string, children: Token[]) {
+    super(type, body, children);
   }
 }

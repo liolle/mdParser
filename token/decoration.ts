@@ -38,21 +38,4 @@ export class Decoration extends Token {
   get tag() {
     return this._tag;
   }
-
-  compileToHTMLString(indent: number = 0): string {
-    const indentation = ' '.repeat(indent);
-    let output = `${indentation}`;
-
-    output += `<${this.tag}>\n`;
-    for (const el of this.children) {
-      output += el.compileToHTMLString(
-        indent + TOKEN.TOKEN_DISPLAY_INDENTATION,
-      );
-      output += '\n';
-    }
-    output += indentation;
-    output += `</${this.tag}>\n`;
-
-    return output;
-  }
 }

@@ -37,33 +37,10 @@ export class CodeToken extends Token {
   get language() {
     return this._language;
   }
-
-  compileToHTMLString(indent: number = 0): string {
-    const indentation = ' '.repeat(indent);
-    let output = `${indentation}`;
-
-    if (this.type == TOKEN.TOKEN_TYPE.INLINE_CODE) {
-      output += `<code>${this.body}`;
-      output += `</code>\n`;
-    } else {
-      output += `<div class="codeBlock">`;
-      output += `${this.body}`;
-      output += `</div>\n`;
-    }
-    return output;
-  }
 }
 
 export class InlineCode extends Token {
   constructor(body: string) {
     super(TOKEN.TOKEN_TYPE.INLINE_CODE, body, []);
-  }
-
-  compileToHTMLString(indent: number = 0): string {
-    const indentation = ' '.repeat(indent);
-    let output = `${indentation}`;
-    output += `<code>${this.body}`;
-    output += `</code>\n`;
-    return output;
   }
 }

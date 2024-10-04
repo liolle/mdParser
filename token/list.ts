@@ -74,27 +74,6 @@ export class ListToken extends Token {
     }
     return output;
   }
-
-  compileToHTMLString(indent: number = 0): string {
-    const indentation = ' '.repeat(indent);
-    let output = `${indentation}`;
-
-    if (this.type == TOKEN.TOKEN_TYPE.LI) {
-      output += `<li>${this.children[0].body}</li>`;
-    } else {
-      output += `<ul>\n`;
-      output += `${this.body}`;
-      for (const elem of this.children) {
-        output += `${elem.compileToHTMLString(
-          indent + TOKEN.TOKEN_DISPLAY_INDENTATION,
-        )}\n`;
-      }
-      output += indentation;
-      output += `</ul>`;
-    }
-
-    return output;
-  }
 }
 
 class NestedList {
