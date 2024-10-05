@@ -9,7 +9,7 @@ export type LIST_TOKEN_TYPE =
 
 export class ListToken extends Token {
   private _depth: number;
-  private _last_modified_token: ListToken;
+  private _last_modified_token: ListToken | null = null;
   constructor(
     body: string,
     children: Token[],
@@ -38,12 +38,16 @@ export class ListToken extends Token {
 
     let i = 0;
     for (; i < n; i++) {
-      if (token.children[i].type != TOKEN.TOKEN_TYPE.WORD) break;
-      node.children[0].appendWord(token.children[i]);
+      const child = token.children[i];
+      if (!child || !node) break;
+      if (child.type != TOKEN.TOKEN_TYPE.WORD) break;
+      if (node.children[0]) node.children[0].appendWord(child);
     }
 
     for (; i < n; i++) {
-      node.children.push(token.children[i]);
+      const child = token.children[i];
+      if (!child || !node) break;
+      node.children.push(child);
     }
   }
 
@@ -88,11 +92,11 @@ class NestedList {
 
   pushElement(body: string, depth: number) {
     let node = this.#last;
-    while (depth <= node.depth) {
+    while (node && depth <= node.depth) {
       this._stack.pop();
       node = this.#last;
     }
-
+    if (!node) return;
     const new_node = this.#getNestedNode(body, depth);
     node.pushToChildren(new_node);
     this._stack.push(new_node);
@@ -104,8 +108,8 @@ class NestedList {
       const parts = body.split(/\[[xX ]\] /);
 
       return Factory.CHECK_BOX(
-        /[xX]/.test(body[1]),
-        parts[parts.length - 1],
+        /[xX]/.test(body[1] || ''),
+        parts[parts.length - 1] || '',
         depth,
       );
     }
@@ -138,7 +142,7 @@ export class ListTokenBuilder {
     if (raw_value == '') return;
     const [spaces, body] = raw_value.split('- ');
     let depth = (spaces ? spaces.length : 0) + 1;
-    this.list.pushElement(body, depth);
+    this.list.pushElement(body || '', depth);
   }
 
   get token() {

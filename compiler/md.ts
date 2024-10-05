@@ -144,7 +144,9 @@ export class MDAdapter implements Adapter<Token> {
 
     if (token.type == TOKEN.TOKEN_TYPE.LI) {
       output += `<li>`;
-      output += this.#recursiveCompile(token.children[0], 0);
+      if (token.children[0]) {
+        output += this.#recursiveCompile(token.children[0], 0);
+      }
       output += `</li>`;
     } else {
       output += `<ul>\n`;

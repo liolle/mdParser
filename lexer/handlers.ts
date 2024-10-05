@@ -46,7 +46,7 @@ export namespace HANDLERS {
       let next_idx = Infinity;
 
       for (const pattern of PATTERNS.EXTERNAL_LINK_NESTED_PATTER) {
-        const exec_res = pattern.regex().exec(name);
+        const exec_res = pattern.regex().exec(name || '');
         if (!exec_res) continue;
         if (
           exec_res['index'] != 0 ||
@@ -57,12 +57,12 @@ export namespace HANDLERS {
       }
 
       if (next_idx != Infinity) {
-        const word = name.slice(0, next_idx);
+        const word = name ? name.slice(0, next_idx) : '';
         if (word.length > 0) {
           tokens.push(new Token(TOKEN.TOKEN_TYPE.WORD, word, []));
         }
         tokens.push(
-          ...TOKENIZER.tokenize(name.slice(next_idx), {
+          ...TOKENIZER.tokenize(name ? name.slice(next_idx) : '', {
             patterns: PATTERNS.EXTERNAL_LINK_NESTED_PATTER,
           }),
         );
@@ -72,7 +72,7 @@ export namespace HANDLERS {
 
       lexer.push(
         new LinkToken(
-          url,
+          url || '',
           tokens,
           offset == 2 ? LINK_TOKEN_TYPE.IMAGE : LINK_TOKEN_TYPE.DEFAULT,
         ),
@@ -226,7 +226,7 @@ export namespace HANDLERS {
       let list: ListTokenBuilder;
       const last_element = lexer.tokens[len - 1];
 
-      if (last_element.type == TOKEN.TOKEN_TYPE.UL) {
+      if (last_element && last_element.type == TOKEN.TOKEN_TYPE.UL) {
         const list_token = lexer.tokens[len - 1] as ListToken;
         const list = new ListTokenBuilder(list_token);
         for (const line of raw_value.split('\n')) {

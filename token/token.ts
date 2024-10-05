@@ -93,7 +93,15 @@ export class Token {
     if (token.children.length != this.children.length) return false;
 
     for (let i = 0; i < this.children.length; i++) {
-      if (!this.children[i].equal(token.children[i])) return false;
+      const c1 = this.children[i];
+      const c2 = token.children[i];
+      if (!c1 && !c2) {
+        continue;
+      } else if (!c1 || !c2) {
+        return false;
+      } else {
+        if (!c1.equal(c2)) return false;
+      }
     }
     return true;
   }

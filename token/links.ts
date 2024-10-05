@@ -25,7 +25,8 @@ export class LinkToken extends Token {
   }
 
   get name() {
-    return this.children[0].body;
+    const token = this.children[0];
+    return token ? token.body : '';
   }
 
   get isUrlSet() {
