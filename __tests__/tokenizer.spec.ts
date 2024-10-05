@@ -1,10 +1,10 @@
 import { describe, expect, onTestFailed, suite, test } from 'vitest';
-import { TOKENIZER } from '../lexer/tokenizer';
+import { TOKENIZER } from '../src/lexer/tokenizer';
 import { CONSTANT } from './constants';
-import { SUPPORTED_LANGUAGES } from '../token/code';
-import { Token, TOKEN } from '../token/token';
-import { Factory } from '../token/factory';
-import { LinkToken, LINK_TOKEN_TYPE } from '../token/links';
+import { SUPPORTED_LANGUAGES } from '../src/token/code';
+import { Token, TOKEN } from '../src/token/token';
+import { Factory } from '../src/token/factory';
+import { LinkToken, LINK_TOKEN_TYPE } from '../src/token/links';
 
 describe('Parsing', () => {
   suite('Base case', () => {

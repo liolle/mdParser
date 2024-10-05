@@ -1,8 +1,8 @@
 import { readFileSync } from 'fs';
-import { StringTokenCompiler } from './compiler/compiler';
-import { MDAdapter } from './compiler/md';
-import { TOKENIZER } from './lexer/tokenizer';
-import { Factory } from './token/factory';
+import { StringTokenCompiler } from './src/compiler/compiler';
+import { MDAdapter } from './src/compiler/md';
+import { TOKENIZER } from './src/lexer/tokenizer';
+import { Factory } from './src/token/factory';
 
 function main() {
   try {
