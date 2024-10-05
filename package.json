@@ -1,5 +1,5 @@
 {
-  "name": "md-parser",
+  "name": "@edllx/md-parser",
   "version": "2.0.0",
   "description": "Markdown parser",
   "main": "./dist/index.js",
