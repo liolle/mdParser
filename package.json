@@ -23,6 +23,7 @@
     "test:once": "vitest run --config ./vitest.config.ts",
     "start": "tsx main.ts",
     "lint": "tsc",
+    "release": "pnpm build && pnpm changeset publish",
     "build": "tsup --format cjs,esm --dts"
   },
   "keywords": [],
