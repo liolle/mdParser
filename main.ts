@@ -1,8 +1,8 @@
 import { readFileSync } from 'fs';
+import { StringTokenCompiler } from './compiler/compiler';
+import { MDAdapter } from './compiler/md';
 import { TOKENIZER } from './lexer/tokenizer';
 import { Factory } from './token/factory';
-import { TokenCompiler } from './compiler/compiler';
-import { MDAdapter } from './compiler/md';
 
 function main() {
   try {
@@ -12,8 +12,7 @@ function main() {
       ),
     );
 
-    const compiler = new TokenCompiler(new MDAdapter());
-
+    const compiler = new StringTokenCompiler(new MDAdapter());
     console.log(compiler.compile(root));
   } catch (error) {
     console.log(error);

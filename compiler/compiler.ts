@@ -4,8 +4,13 @@ export interface Adapter<T> {
   compile: (input: T) => string;
 }
 
-export class TokenCompiler {
+export interface TokenCompiler<T> {
+  compile: (token: Token) => T;
+}
+
+export class StringTokenCompiler implements TokenCompiler<string> {
   private _adapter: Adapter<Token>;
+
   constructor(adapter: Adapter<Token>) {
     this._adapter = adapter;
   }
