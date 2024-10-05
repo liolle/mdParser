@@ -14,8 +14,12 @@
       "compiler/compiler.ts",
       "compiler/md.ts"
     ],
+    "format": [
+      "cjs",
+      "esm"
+    ],
+    "dts": true,
     "splitting": false,
-    "sourcemap": true,
     "clean": true
   },
   "scripts": {
@@ -24,7 +28,7 @@
     "start": "tsx main.ts",
     "lint": "tsc",
     "release": "pnpm build && pnpm changeset publish",
-    "build": "tsup --format cjs,esm --dts"
+    "build": "tsup"
   },
   "keywords": [],
   "author": "",
