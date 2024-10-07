@@ -2,8 +2,6 @@
 
 # simple
 
-** boder \_\_ita ** \_\_
-
 This is some placeholder text to show examples of Markdown formatting. We have
 [a full article template](https://github.com/do-community/do-article-templates)
 you can use when writing a DigitalOcean article. Please refer to our style and

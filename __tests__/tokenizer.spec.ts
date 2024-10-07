@@ -109,6 +109,36 @@ describe('Parsing', () => {
       expect(actual.equal(expected)).toEqual(true);
     });
 
+    test('Multiple bold', () => {
+      const actual = Factory.ROOT(
+        TOKENIZER.tokenize(
+          'This is _italics_, this is **first bold**, and this is **second bold** end',
+        ),
+      );
+
+      const expected = Factory.ROOT([
+        Factory.WORD('This is '),
+        Factory.DECORATION(TOKEN.TOKEN_TYPE.ITALIC, '', [
+          Factory.WORD('italics'),
+        ]),
+        Factory.WORD(', this is '),
+        Factory.DECORATION(TOKEN.TOKEN_TYPE.BOLD, '', [
+          Factory.WORD('first bold'),
+        ]),
+        Factory.WORD(', and this is '),
+        Factory.DECORATION(TOKEN.TOKEN_TYPE.BOLD, '', [
+          Factory.WORD('second bold'),
+        ]),
+        Factory.WORD(' end'),
+      ]);
+
+      onTestFailed(e => {
+        expect(actual.print()).toEqual(expected.print());
+      });
+
+      expect(actual.equal(expected)).toEqual(true);
+    });
+
     test('StrikeThrough', () => {
       const actual = Factory.ROOT(TOKENIZER.tokenize('~~Strikethrough~~'));
       const expected = Factory.ROOT([

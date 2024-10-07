@@ -12,24 +12,24 @@ export namespace PATTERNS {
   const PAT = {
     BOLD: {
       regex: () =>
-        /((?<=[^\*]|^)\*{2}(?=[^\*]|$))[^\n]+((?<=[^\*]|^)\*{2}(?=[^\*]|$))/g,
+        /((?<=[^\*]|^)\*{2}(?=[^\*]|$))[^\n]*?((?<=[^\*]|^)\*{2}(?=[^\*]|$))/g,
       handler: HANDLERS.wrapperHandler(TOKEN.TOKEN_TYPE.BOLD),
       type: TOKEN.TOKEN_TYPE.BOLD,
     },
     ITALIC: {
-      regex: () => /((?<=[^_]|^)_(?=[^_]|$))[^\n]+((?<=[^_]|^)_(?=[^_]|$))/g,
+      regex: () => /((?<=[^_]|^)_(?=[^_]|$))[^\n]+?((?<=[^_]|^)_(?=[^_]|$))/g,
       handler: HANDLERS.wrapperHandler(TOKEN.TOKEN_TYPE.ITALIC),
       type: TOKEN.TOKEN_TYPE.ITALIC,
     },
     STRIKETHROUGH: {
       regex: () =>
-        /((?<=[^~~]|^)~~(?=[^~~]|$))[^\n]+((?<=[^~~]|^)~~(?=[^~~]|$))/g,
+        /((?<=[^~~]|^)~~(?=[^~~]|$))[^\n]+?((?<=[^~~]|^)~~(?=[^~~]|$))/g,
       handler: HANDLERS.wrapperHandler(TOKEN.TOKEN_TYPE.STRIKETHROUGH),
       type: TOKEN.TOKEN_TYPE.STRIKETHROUGH,
     },
     HIGHLIGHT: {
       regex: () =>
-        /((?<=[^==]|^)==(?=[^==]|$))[^\n]+((?<=[^==]|^)==(?=[^==]|$))/g,
+        /((?<=[^==]|^)==(?=[^==]|$))[^\n]+?((?<=[^==]|^)==(?=[^==]|$))/g,
       handler: HANDLERS.wrapperHandler(TOKEN.TOKEN_TYPE.HIGHLIGHT),
       type: TOKEN.TOKEN_TYPE.HIGHLIGHT,
     },
@@ -45,78 +45,78 @@ export namespace PATTERNS {
       type: TOKEN.TOKEN_TYPE.CODE_BLOCK,
     },
     SPACE: {
-      regex: () => / /,
+      regex: () => / /g,
       handler: HANDLERS.defaultHandler(TOKEN.TOKEN_TYPE.SPACE),
       type: TOKEN.TOKEN_TYPE.SPACE,
     },
     WORD: {
-      regex: () => /[^\n\\]+/,
+      regex: () => /[^\n\\]+/g,
       handler: HANDLERS.wordHandler(TOKEN.TOKEN_TYPE.WORD),
       type: TOKEN.TOKEN_TYPE.WORD,
     },
     H6: {
-      regex: () => /^###### [^\n]+\n?/,
+      regex: () => /^###### [^\n]+\n?/g,
       handler: HANDLERS.headerHandler(TOKEN.TOKEN_TYPE.H6, '###### '),
       type: TOKEN.TOKEN_TYPE.H6,
     },
     H5: {
-      regex: () => /^##### [^\n]+\n?/,
+      regex: () => /^##### [^\n]+\n?/g,
       handler: HANDLERS.headerHandler(TOKEN.TOKEN_TYPE.H5, '##### '),
       type: TOKEN.TOKEN_TYPE.H5,
     },
     H4: {
-      regex: () => /^#### [^\n]+\n?/,
+      regex: () => /^#### [^\n]+\n?/g,
       handler: HANDLERS.headerHandler(TOKEN.TOKEN_TYPE.H4, '#### '),
       type: TOKEN.TOKEN_TYPE.H4,
     },
     H3: {
-      regex: () => /^### [^\n]+\n?/,
+      regex: () => /^### [^\n]+\n?/g,
       handler: HANDLERS.headerHandler(TOKEN.TOKEN_TYPE.H3, '### '),
       type: TOKEN.TOKEN_TYPE.H3,
     },
     H2: {
-      regex: () => /^## [^\n]+\n?/,
+      regex: () => /^## [^\n]+\n?/g,
       handler: HANDLERS.headerHandler(TOKEN.TOKEN_TYPE.H2, '## '),
       type: TOKEN.TOKEN_TYPE.H2,
     },
 
     H1: {
-      regex: () => /^# [^\n]+\n?/,
+      regex: () => /^# [^\n]+\n?/g,
       handler: HANDLERS.headerHandler(TOKEN.TOKEN_TYPE.H1, '# '),
       type: TOKEN.TOKEN_TYPE.H1,
     },
     NEW_LINE: {
-      regex: () => /\n|\s\n/,
+      regex: () => /\n|\s\n/g,
       handler: HANDLERS.defaultHandler(TOKEN.TOKEN_TYPE.NEW_LINE),
       type: TOKEN.TOKEN_TYPE.NEW_LINE,
     },
     ESCAPE: {
-      regex: () => /\\./,
+      regex: () => /\\./g,
       handler: HANDLERS.escapeHandler(TOKEN.TOKEN_TYPE.ESCAPE),
       type: TOKEN.TOKEN_TYPE.ESCAPE,
     },
     PARAGRAPH: {
-      regex: () => /[^\n]+\n/,
+      regex: () => /[^\n]+\n/g,
       handler: HANDLERS.paragraphHandler(TOKEN.TOKEN_TYPE.PARAGRAPH, ''),
       type: TOKEN.TOKEN_TYPE.PARAGRAPH,
     },
     EXTERNAL_LINK: {
-      regex: () => /!?\[[^\n]*\]\([^\n]*\)\n?/,
+      regex: () => /!?\[[^\n]*\]\([^\n]*\)\n?/g,
       handler: HANDLERS.externalLinkHandler(TOKEN.TOKEN_TYPE.EXTERNAL_LINK),
       type: TOKEN.TOKEN_TYPE.EXTERNAL_LINK,
     },
     UL: {
-      regex: () => /[ \t]*- [^\n]*(\s*- [^\n]*\n?)*/,
+      regex: () => /[ \t]*- [^\n]*(\s*- [^\n]*\n?)*/g,
       handler: HANDLERS.listHandler(TOKEN.TOKEN_TYPE.UL),
       type: TOKEN.TOKEN_TYPE.UL,
     },
     LI: {
-      regex: () => /[ \t]*- [^\n]*(\s*- [^\n]*\n?)*/,
+      regex: () => /[ \t]*- [^\n]*(\s*- [^\n]*\n?)*/g,
       handler: HANDLERS.listHandler(TOKEN.TOKEN_TYPE.UL),
       type: TOKEN.TOKEN_TYPE.UL,
     },
     CHECK_BOX: {
-      regex: () => /\[[ xX]\]/,
+      regex: () => /\[[ xX]\]/g,
       handler: HANDLERS.listHandler(TOKEN.TOKEN_TYPE.UL),
       type: TOKEN.TOKEN_TYPE.UL,
     },

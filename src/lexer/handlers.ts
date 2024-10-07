@@ -261,22 +261,22 @@ export namespace HANDLERS {
       word: string;
     },
   ) {
-    let idx = 0;
-
     let idx_match: NestedIdx[] = [];
+    const remainder = body.slice(0);
     for (const pattern of patterns) {
-      const remainder = body.slice(idx);
-      const exec_res = pattern.regex().exec(remainder);
+      const regex = pattern.regex();
+      let match;
 
-      if (exec_res) {
-        const n_body = exec_res[0];
+      while ((match = regex.exec(remainder))) {
+        const n_body = match[0];
         idx_match.push({
-          range: [exec_res['index'], exec_res['index'] + n_body.length - 1],
+          range: [match['index'], match['index'] + n_body.length - 1],
           type: pattern.type,
           text: n_body,
         });
       }
     }
+
     const nested_token = spitNestedToken(idx_match, body);
 
     for (const token of nested_token) {

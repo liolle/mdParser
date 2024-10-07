@@ -127,8 +127,6 @@ export class MDAdapter implements Adapter<Token> {
       output += '\n';
       output += indentation + ' '.repeat(this.BASE_INDENT);
       output += `<img src="${token.body}" width="200" style="object-fit: contain;">\n`;
-      output += indentation + ' '.repeat(this.BASE_INDENT);
-      output += `</img>\n`;
       output += indentation;
     } else {
       output += `${token.name}`;
@@ -144,8 +142,9 @@ export class MDAdapter implements Adapter<Token> {
 
     if (token.type == TOKEN.TOKEN_TYPE.LI) {
       output += `<li>`;
-      if (token.children[0]) {
-        output += this.#recursiveCompile(token.children[0], 0);
+
+      for (const el of token.children) {
+        output += this.#recursiveCompile(el, 0);
       }
       output += `</li>`;
     } else {
