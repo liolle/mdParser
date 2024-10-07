@@ -1,5 +1,11 @@
 # md-parser
 
+## 2.0.2
+
+### Patch Changes
+
+- b45c578: Fix Nested decoration parsing & add Token factory in the lib
+
 ## 2.0.1
 
 ### Patch Changes
