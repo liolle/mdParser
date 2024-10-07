@@ -23,14 +23,14 @@
   "scripts": {
     "test": "vitest --config ./vitest.config.ts",
     "test:once": "vitest run --config ./vitest.config.ts",
-    "start": "tsx main.ts",
+    "start": "tsx src/main.ts",
     "lint": "tsc",
     "release": "pnpm build && pnpm changeset publish",
     "build": "tsup"
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "devDependencies": {
     "@changesets/cli": "^2.27.9",
     "@types/node": "^22.5.5",

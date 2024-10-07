@@ -220,6 +220,10 @@ export namespace PATTERNS {
     //
     PAT.ESCAPE,
     PAT.EXTERNAL_LINK,
+    PAT.BOLD,
+    PAT.ITALIC,
+    PAT.STRIKETHROUGH,
+    PAT.HIGHLIGHT,
     PAT.WORD,
   ];
 }

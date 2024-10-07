@@ -1,10 +1,9 @@
 import { describe, expect, onTestFailed, suite, test } from 'vitest';
 import { TOKENIZER } from '../src/lexer/tokenizer';
-import { CONSTANT } from './constants';
 import { SUPPORTED_LANGUAGES } from '../src/token/code';
-import { Token, TOKEN } from '../src/token/token';
 import { Factory } from '../src/token/factory';
-import { LinkToken, LINK_TOKEN_TYPE } from '../src/token/links';
+import { TOKEN } from '../src/token/token';
+import { CONSTANT } from './constants';
 
 describe('Parsing', () => {
   suite('Base case', () => {
@@ -73,6 +72,34 @@ describe('Parsing', () => {
         Factory.DECORATION(TOKEN.TOKEN_TYPE.ITALIC, '', [
           Factory.WORD('Italic'),
         ]),
+      ]);
+
+      onTestFailed(e => {
+        expect(actual.print()).toEqual(expected.print());
+      });
+
+      expect(actual.equal(expected)).toEqual(true);
+    });
+
+    test('Mixed decoration in word', () => {
+      const actual = Factory.ROOT(
+        TOKENIZER.tokenize(
+          'This is _italics_, this is **bold**, and this is ~~strikethrough~~.',
+        ),
+      );
+
+      const expected = Factory.ROOT([
+        Factory.WORD('This is '),
+        Factory.DECORATION(TOKEN.TOKEN_TYPE.ITALIC, '', [
+          Factory.WORD('italics'),
+        ]),
+        Factory.WORD(', this is '),
+        Factory.DECORATION(TOKEN.TOKEN_TYPE.BOLD, '', [Factory.WORD('bold')]),
+        Factory.WORD(', and this is '),
+        Factory.DECORATION(TOKEN.TOKEN_TYPE.STRIKETHROUGH, '', [
+          Factory.WORD('strikethrough'),
+        ]),
+        Factory.WORD('.'),
       ]);
 
       onTestFailed(e => {

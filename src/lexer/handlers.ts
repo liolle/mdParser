@@ -25,8 +25,13 @@ export namespace HANDLERS {
       };
 
       nestedSearch(PATTERNS.WORD_NESTED_PATTER, raw_value, type, tokens, word);
-
-      lexer.push(new Word(word.word, tokens));
+      if (tokens.length > 0) {
+        for (const t of tokens) {
+          lexer.push(t);
+        }
+      } else {
+        lexer.push(Factory.WORD(word.word));
+      }
       lexer.bump(raw_value.length);
     };
   }
@@ -256,34 +261,97 @@ export namespace HANDLERS {
       word: string;
     },
   ) {
-    let next_idx = Infinity;
+    let idx = 0;
 
+    let idx_match: NestedIdx[] = [];
     for (const pattern of patterns) {
-      const exec_res = pattern.regex().exec(body);
-      if (!exec_res) continue;
-      if (
-        exec_res['index'] != 0 ||
-        (pattern.type != type && pattern.type != TOKEN.TOKEN_TYPE.WORD)
-      ) {
-        next_idx = Math.min(next_idx, exec_res['index']);
+      const remainder = body.slice(idx);
+      const exec_res = pattern.regex().exec(remainder);
+
+      if (exec_res) {
+        const n_body = exec_res[0];
+        idx_match.push({
+          range: [exec_res['index'], exec_res['index'] + n_body.length - 1],
+          type: pattern.type,
+          text: n_body,
+        });
       }
     }
+    const nested_token = spitNestedToken(idx_match, body);
 
-    if (next_idx != Infinity) {
-      const word = body.slice(0, next_idx);
-      if (word.length > 0) {
-        tokens.push(Factory.WORD(word));
-      }
-      tokens.push(
-        ...TOKENIZER.tokenize(body.slice(next_idx), {
-          patterns: patterns,
-        }),
-      );
-    } else {
-      if (type != TOKEN.TOKEN_TYPE.WORD) tokens.push(Factory.WORD(body));
-      else {
-        options.word += body;
+    for (const token of nested_token) {
+      if (token.type == TOKEN.TOKEN_TYPE.WORD) {
+        tokens.push(Factory.WORD(token.text));
+      } else {
+        tokens.push(...TOKENIZER.tokenize(token.text));
       }
     }
   }
+}
+
+type NestedIdx = {
+  range: [number, number];
+  type: TOKEN.TOKEN_TYPE;
+  text: string;
+};
+
+function spitNestedToken(ranges: NestedIdx[], body: string) {
+  const res: NestedIdx[] = [];
+  const n = ranges.length;
+  ranges.sort((a, b) => (a.range[0] || 0) - (b.range[0] || 0));
+
+  for (let i = 0, idx = 0; i < n; i++) {
+    const cur = ranges[i] as NestedIdx;
+    const last = res.pop();
+    if (!last) {
+      res.push(cur);
+    } else if (last.type == TOKEN.TOKEN_TYPE.WORD) {
+      last.text = last.text.slice(last.range[0], cur.range[0]);
+      last.range[1] = cur.range[0] - 1;
+      res.push(last);
+      res.push(cur);
+    } else {
+      if (last.range[1] < cur.range[0]) {
+        res.push(last);
+        const mid = [last.range[1] + 1, cur.range[0] - 1] as [number, number];
+        if (mid[1] >= mid[0]) {
+          res.push({
+            range: mid,
+            text: body.slice(mid[0], mid[1] + 1),
+            type: TOKEN.TOKEN_TYPE.WORD,
+          });
+        }
+        res.push(cur);
+      } else {
+        res.push(last);
+        const right = [
+          last.range[1] + 1,
+          Math.max(last.range[1], cur.range[1]),
+        ] as [number, number];
+
+        if (right[1] >= right[0]) {
+          res.push({
+            range: right,
+            text: body.slice(right[0], right[1] + 1),
+            type: cur.type,
+          });
+        }
+      }
+    }
+  }
+
+  const last = res.pop();
+  const len = body.length;
+
+  if (last) {
+    res.push(last);
+    if (last.range[1] < len - 1) {
+      res.push({
+        range: [last.range[1] + 1, len - 1],
+        text: body.slice(last.range[1] + 1),
+        type: TOKEN.TOKEN_TYPE.WORD,
+      });
+    }
+  }
+  return res;
 }
