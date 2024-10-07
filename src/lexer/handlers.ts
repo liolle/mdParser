@@ -10,10 +10,19 @@ import { TOKENIZER } from './tokenizer';
 export namespace HANDLERS {
   export function defaultHandler(type: TOKEN.TOKEN_TYPE) {
     return (lexer: Lexer.Lexer, regex: RegExp, raw_value: string) => {
-      lexer.push(Factory.NEW_LINE());
+      lexer.push(Factory.WORD(raw_value));
       lexer.bump(raw_value.length);
+    };
+  }
 
-      if (raw_value == '\n') lexer.bumpLine();
+  export function newLineHandler(type: TOKEN.TOKEN_TYPE) {
+    return (lexer: Lexer.Lexer, regex: RegExp, raw_value: string) => {
+      const last_element = lexer.tokens[lexer.tokens.length - 1];
+      if (!(last_element && last_element.type == TOKEN.TOKEN_TYPE.UL)) {
+        lexer.push(Factory.NEW_LINE());
+      }
+      lexer.bump(raw_value.length);
+      lexer.bumpLine();
     };
   }
 
@@ -24,14 +33,23 @@ export namespace HANDLERS {
         word: '',
       };
 
+      const last_element = lexer.tokens[lexer.tokens.length - 1];
+
       nestedSearch(PATTERNS.WORD_NESTED_PATTER, raw_value, type, tokens, word);
-      if (tokens.length > 0) {
-        for (const t of tokens) {
-          lexer.push(t);
-        }
+
+      if (last_element && last_element.type == TOKEN.TOKEN_TYPE.UL) {
+        const list_token = lexer.tokens[lexer.tokens.length - 1] as ListToken;
+        list_token.fuse(new Token(type, word.word, tokens));
       } else {
-        lexer.push(Factory.WORD(word.word));
+        if (tokens.length > 0) {
+          for (const t of tokens) {
+            lexer.push(t);
+          }
+        } else {
+          lexer.push(Factory.WORD(word.word));
+        }
       }
+
       lexer.bump(raw_value.length);
     };
   }
@@ -176,7 +194,7 @@ export namespace HANDLERS {
   export function paragraphHandler(type: TOKEN.TOKEN_TYPE, key: string) {
     return (lexer: Lexer.Lexer, regex: RegExp, raw_value: string) => {
       // extract body
-      const body = raw_value.slice(0, raw_value.length - 1);
+      const body = raw_value.trim();
       const tokens: Token[] = [];
       let word = {
         word: '',

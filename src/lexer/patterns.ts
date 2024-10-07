@@ -87,7 +87,7 @@ export namespace PATTERNS {
     },
     NEW_LINE: {
       regex: () => /\n|\s\n/g,
-      handler: HANDLERS.defaultHandler(TOKEN.TOKEN_TYPE.NEW_LINE),
+      handler: HANDLERS.newLineHandler(TOKEN.TOKEN_TYPE.NEW_LINE),
       type: TOKEN.TOKEN_TYPE.NEW_LINE,
     },
     ESCAPE: {
@@ -96,7 +96,7 @@ export namespace PATTERNS {
       type: TOKEN.TOKEN_TYPE.ESCAPE,
     },
     PARAGRAPH: {
-      regex: () => /[^\n]+\n/g,
+      regex: () => /.(\n|.)+?\n\n/g,
       handler: HANDLERS.paragraphHandler(TOKEN.TOKEN_TYPE.PARAGRAPH, ''),
       type: TOKEN.TOKEN_TYPE.PARAGRAPH,
     },

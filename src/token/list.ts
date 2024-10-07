@@ -57,15 +57,11 @@ export class ListToken extends Token {
   }
 
   fuse(token: Token) {
-    if (
-      token.type != TOKEN.TOKEN_TYPE.UL &&
-      token.type != TOKEN.TOKEN_TYPE.LI &&
-      token.type != TOKEN.TOKEN_TYPE.PARAGRAPH
-    ) {
-      return;
+    if (token.type == TOKEN.TOKEN_TYPE.PARAGRAPH) {
+      this.#fuseParagraph(token);
     }
 
-    if (token.type == TOKEN.TOKEN_TYPE.PARAGRAPH) {
+    if (token.type == TOKEN.TOKEN_TYPE.WORD) {
       this.#fuseParagraph(token);
     }
   }

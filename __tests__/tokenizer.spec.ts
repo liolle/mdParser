@@ -170,7 +170,9 @@ describe('Parsing', () => {
     });
 
     test('Paragraph', () => {
-      const actual = Factory.ROOT(TOKENIZER.tokenize('This is a paragraph.\n'));
+      const actual = Factory.ROOT(
+        TOKENIZER.tokenize('This is a paragraph.\n\n'),
+      );
       const expected = Factory.ROOT([
         Factory.PARAGRAPH([Factory.WORD('This is a paragraph.')]),
       ]);
@@ -502,6 +504,10 @@ describe('Parsing', () => {
           Factory.LI('Simple LI', []),
         ]),
       ]);
+
+      onTestFailed(e => {
+        expect(actual.print()).toEqual(expected.print());
+      });
 
       expect(actual.equal(expected)).toEqual(true);
     });
