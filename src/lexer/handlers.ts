@@ -200,7 +200,7 @@ export namespace HANDLERS {
   export function paragraphHandler(type: TOKEN.TOKEN_TYPE, key: string) {
     return (lexer: Lexer.Lexer, regex: RegExp, raw_value: string) => {
       // extract body
-      const body = raw_value.trim();
+      const body = raw_value.trim().replace(/\n/g, '');
       const tokens: Token[] = [];
       let word = {
         word: '',
