@@ -169,7 +169,7 @@ export namespace HANDLERS {
 
         case TOKEN.TOKEN_TYPE.HIGHLIGHT:
           size = 2;
-          patterns = PATTERNS.STRIKETHROUGH_NESTED_PATTER;
+          patterns = PATTERNS.HIGHLIGHT_NESTED_PATTER;
           break;
 
         case TOKEN.TOKEN_TYPE.INLINE_CODE:
@@ -183,6 +183,7 @@ export namespace HANDLERS {
 
       // extract body
       const body = raw_value.slice(size, raw_value.length - size);
+
       const tokens: Token[] = [];
       let word = {
         word: '',
@@ -221,6 +222,7 @@ export namespace HANDLERS {
       } else {
         lexer.push(new Token(type, word.word, tokens));
       }
+
       lexer.bump(raw_value.length);
 
       return true;
@@ -286,12 +288,12 @@ export namespace HANDLERS {
     },
   ) {
     let idx_match: NestedIdx[] = [];
-    const remainder = body.slice(0);
+
     for (const pattern of patterns) {
       const regex = pattern.regex();
       let match;
 
-      while ((match = regex.exec(remainder))) {
+      while ((match = regex.exec(body))) {
         const n_body = match[0];
         idx_match.push({
           range: [match['index'], match['index'] + n_body.length - 1],
@@ -322,6 +324,7 @@ type NestedIdx = {
 function spitNestedToken(ranges: NestedIdx[], body: string) {
   const res: NestedIdx[] = [];
   const n = ranges.length;
+
   ranges.sort((a, b) => (a.range[0] || 0) - (b.range[0] || 0));
 
   for (let i = 0, idx = 0; i < n; i++) {
@@ -377,5 +380,6 @@ function spitNestedToken(ranges: NestedIdx[], body: string) {
       });
     }
   }
+
   return res;
 }

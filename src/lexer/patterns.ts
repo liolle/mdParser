@@ -34,7 +34,7 @@ export namespace PATTERNS {
       type: TOKEN.TOKEN_TYPE.HIGHLIGHT,
     },
     INLINE_CODE: {
-      regex: () => /((?<=[^`]|^)`(?=[^`]|$))[^\n]+((?<=[^`]|^)`(?=[^`]|$))/g,
+      regex: () => /((?<=[^`]|^)`(?=[^`]|$))[^\n]+?((?<=[^`]|^)`(?=[^`]|$))/g,
       handler: HANDLERS.codeHandler(TOKEN.TOKEN_TYPE.INLINE_CODE),
       type: TOKEN.TOKEN_TYPE.INLINE_CODE,
     },
@@ -159,6 +159,7 @@ export namespace PATTERNS {
   export const HEADER_NESTED_PATTERNS: Pattern[] = [
     //
     PAT.ESCAPE,
+    PAT.INLINE_CODE,
     PAT.EXTERNAL_LINK,
     PAT.BOLD,
     PAT.ITALIC,
@@ -170,6 +171,7 @@ export namespace PATTERNS {
   export const BOLD_NESTED_PATTERNS: Pattern[] = [
     //
     PAT.ESCAPE,
+    PAT.INLINE_CODE,
     PAT.EXTERNAL_LINK,
     PAT.ITALIC,
     PAT.STRIKETHROUGH,
@@ -179,6 +181,7 @@ export namespace PATTERNS {
   export const ITALIC_NESTED_PATTERNS: Pattern[] = [
     //
     PAT.ESCAPE,
+    PAT.INLINE_CODE,
     PAT.EXTERNAL_LINK,
     PAT.BOLD,
     PAT.STRIKETHROUGH,
@@ -189,6 +192,7 @@ export namespace PATTERNS {
   export const STRIKETHROUGH_NESTED_PATTER: Pattern[] = [
     //
     PAT.ESCAPE,
+    PAT.INLINE_CODE,
     PAT.EXTERNAL_LINK,
     PAT.BOLD,
     PAT.ITALIC,
@@ -199,6 +203,7 @@ export namespace PATTERNS {
   export const HIGHLIGHT_NESTED_PATTER: Pattern[] = [
     //
     PAT.ESCAPE,
+    PAT.INLINE_CODE,
     PAT.EXTERNAL_LINK,
     PAT.BOLD,
     PAT.ITALIC,
@@ -219,6 +224,7 @@ export namespace PATTERNS {
   export const WORD_NESTED_PATTER: Pattern[] = [
     //
     PAT.ESCAPE,
+    PAT.INLINE_CODE,
     PAT.EXTERNAL_LINK,
     PAT.BOLD,
     PAT.ITALIC,

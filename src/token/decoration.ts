@@ -23,8 +23,9 @@ export class Decoration extends Token {
         this._tag = 'span class="highlight"';
         break;
       case TOKEN.TOKEN_TYPE.STRIKETHROUGH:
-        this._tag = 'strong';
+        this._tag = 's';
         break;
+
       case TOKEN.TOKEN_TYPE.INLINE_CODE:
         this._tag = 'code';
         break;

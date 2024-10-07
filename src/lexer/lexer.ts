@@ -42,6 +42,24 @@ export namespace Lexer {
             ),
           );
           break;
+        case TOKEN.TOKEN_TYPE.STRIKETHROUGH:
+          this._tokens.push(
+            Factory.DECORATION(
+              TOKEN.TOKEN_TYPE.STRIKETHROUGH,
+              token.body,
+              token.children,
+            ),
+          );
+          break;
+        case TOKEN.TOKEN_TYPE.HIGHLIGHT:
+          this._tokens.push(
+            Factory.DECORATION(
+              TOKEN.TOKEN_TYPE.HIGHLIGHT,
+              token.body,
+              token.children,
+            ),
+          );
+          break;
 
         default:
           this._tokens.push(token);
