@@ -422,6 +422,31 @@ describe('Parsing', () => {
 
       expect(actual.equal(expected)).toEqual(true);
     });
+
+    test('Link in list', () => {
+      const actual = Factory.ROOT(
+        TOKENIZER.tokenize(
+          `- Familiarity with [Markdown](https://daringfireball.net/projects/markdown/)`,
+        ),
+      );
+      const expected = Factory.ROOT([
+        Factory.UL([
+          Factory.LI('', [
+            Factory.WORD('Familiarity with '),
+            Factory.LINK(
+              'https://daringfireball.net/projects/markdown/',
+              'Markdown',
+            ),
+          ]),
+        ]),
+      ]);
+
+      onTestFailed(e => {
+        expect(actual.print()).toEqual(expected.print());
+      });
+
+      expect(actual.equal(expected)).toEqual(true);
+    });
   });
 
   suite('List', () => {
@@ -435,16 +460,16 @@ describe('Parsing', () => {
             Factory.WORD('A'),
             Factory.UL([
               Factory.WORD('Sub list of A'),
-              Factory.LI('Element of sub list of A'),
+              Factory.LI('Element of sub list of A', []),
             ]),
           ]),
 
           Factory.UL([
             Factory.WORD('B'),
-            Factory.LI('Sub list of BElement'),
-            Factory.LI('Sub list of B'),
+            Factory.LI('Sub list of BElement', []),
+            Factory.LI('Sub list of B', []),
           ]),
-          Factory.LI('Simple LI'),
+          Factory.LI('Simple LI', []),
         ]),
       ]);
 
@@ -472,8 +497,8 @@ describe('Parsing', () => {
           Factory.CHECK_BOX_UL(false, [
             Factory.CHECK_BOX(false, 'Tasks C'),
             Factory.CHECK_BOX(false, 'Sub task of C'),
-            Factory.LI('[] not a task'),
-            Factory.LI('[x]not a task'),
+            Factory.LI('[] not a task', []),
+            Factory.LI('[x]not a task', []),
           ]),
         ]),
       ]);

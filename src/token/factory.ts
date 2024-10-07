@@ -44,8 +44,17 @@ export class Factory {
     return new Word(body, tokens);
   }
 
-  static LI(body: string, depth = 0) {
-    return new ListToken('', [Factory.WORD(body)], depth, TOKEN.TOKEN_TYPE.LI);
+  static LI(body: string, tokens: Token[], depth = 0) {
+    const t = [];
+    if (body != '') {
+      t.push(Factory.WORD(body));
+    }
+
+    for (const token of tokens) {
+      t.push(token);
+    }
+
+    return new ListToken('', t, depth, TOKEN.TOKEN_TYPE.LI);
   }
 
   static PARAGRAPH(tokens: Token[]) {

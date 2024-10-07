@@ -1,3 +1,4 @@
+import { TOKENIZER } from '../lexer/tokenizer';
 import { Factory } from './factory';
 import { Token, TOKEN } from './token';
 
@@ -113,7 +114,7 @@ class NestedList {
         depth,
       );
     }
-    return Factory.LI(body, depth);
+    return Factory.LI('', TOKENIZER.tokenize(body), depth);
   }
 
   get #size() {
@@ -142,6 +143,7 @@ export class ListTokenBuilder {
     if (raw_value == '') return;
     const [spaces, body] = raw_value.split('- ');
     let depth = (spaces ? spaces.length : 0) + 1;
+
     this.list.pushElement(body || '', depth);
   }
 
