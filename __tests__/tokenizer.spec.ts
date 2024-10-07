@@ -479,6 +479,26 @@ describe('Parsing', () => {
 
       expect(actual.equal(expected)).toEqual(true);
     });
+
+    test('Extract correct info', () => {
+      const actual = Factory.ROOT(
+        TOKENIZER.tokenize(
+          `![Alt text for screen readers](https://assets.digitalocean.com/logos/DO_Logo_horizontal_blue.png 'DigitalOcean Logo')`,
+        ),
+      );
+      const expected = Factory.ROOT([
+        Factory.IMAGE_LINK(
+          'https://assets.digitalocean.com/logos/DO_Logo_horizontal_blue.png',
+          'Alt text for screen readers',
+        ),
+      ]);
+
+      onTestFailed(e => {
+        expect(actual.print()).toEqual(expected.print());
+      });
+
+      expect(actual.equal(expected)).toEqual(true);
+    });
   });
 
   suite('List', () => {

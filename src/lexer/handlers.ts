@@ -62,9 +62,15 @@ export namespace HANDLERS {
 
       const trimmed_value = raw_value.trim();
 
-      const [name, url] = trimmed_value
-        .slice(offset, trimmed_value.length - 1)
-        .split(/\]\s*\(?/);
+      const name_array = trimmed_value.match(/(?<=\[).*(?=\])/g) as [string];
+      const url_arr = trimmed_value.match(
+        /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)(?=\)| )/g,
+      ) as [string];
+
+      const [name, url] = [
+        name_array ? name_array[0] : '',
+        url_arr ? url_arr[0] : '',
+      ];
 
       let next_idx = Infinity;
 
