@@ -1,5 +1,11 @@
 # md-parser
 
+## 2.0.4
+
+### Patch Changes
+
+- 6f7790d: Update lib export
+
 ## 2.0.3
 
 ### Patch Changes
