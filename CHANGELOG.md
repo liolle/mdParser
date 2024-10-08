@@ -1,5 +1,11 @@
 # md-parser
 
+## 2.0.5
+
+### Patch Changes
+
+- 76ec51b: Bugfix (end of list match)
+
 ## 2.0.4
 
 ### Patch Changes
