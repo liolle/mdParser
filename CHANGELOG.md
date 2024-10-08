@@ -1,5 +1,11 @@
 # md-parser
 
+## 2.0.3
+
+### Patch Changes
+
+- 908fbd1: Bug fix (external link, paragraph, decoration)
+
 ## 2.0.2
 
 ### Patch Changes
