@@ -21,16 +21,6 @@ This is _italics_, this is **bold**, this is **underline**, and this is
 - This is a list item.
 - This list is unordered.
 
-1. This is a list item.
-2. This list is ordered.
-
-> This is a quote.
->
-> > This is a quote inside a quote.
->
-> - This is a list in a quote.
-> - Another item in the quote list.
-
 Here's how to include an image with alt text and a title:
 
 ![Alt text for screen readers](https://assets.digitalocean.com/logos/DO_Logo_horizontal_blue.png 'DigitalOcean Logo')

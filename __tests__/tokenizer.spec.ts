@@ -532,6 +532,50 @@ describe('Parsing', () => {
       expect(actual.equal(expected)).toEqual(true);
     });
 
+    test('Base list3', () => {
+      const actual = Factory.ROOT(TOKENIZER.tokenize(CONSTANT.BaseList3));
+
+      const expected = Factory.ROOT([
+        Factory.NEW_LINE(),
+        Factory.UL([
+          Factory.LI('This is a list item.', []),
+          Factory.LI('This list is unordered.', []),
+        ]),
+        Factory.WORD(
+          `Here's how to include an image with alt text and a title:`,
+        ),
+      ]);
+
+      onTestFailed(e => {
+        expect(actual.print()).toEqual(expected.print());
+      });
+
+      expect(actual.equal(expected)).toEqual(true);
+    });
+
+    test('Base list4', () => {
+      const actual = Factory.ROOT(TOKENIZER.tokenize(CONSTANT.BaseList4));
+
+      const expected = Factory.ROOT([
+        Factory.NEW_LINE(),
+        Factory.UL([
+          Factory.LI('This is a list item.', []),
+          Factory.LI('This list is unordered.', []),
+        ]),
+        Factory.PARAGRAPH([
+          Factory.WORD(
+            `Here's how to include an image with alt text and a title:`,
+          ),
+        ]),
+      ]);
+
+      onTestFailed(e => {
+        expect(actual.print()).toEqual(expected.print());
+      });
+
+      expect(actual.equal(expected)).toEqual(true);
+    });
+
     test('TaskList', () => {
       const actual = Factory.ROOT(TOKENIZER.tokenize(CONSTANT.BaseList2));
 

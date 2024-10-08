@@ -31,6 +31,20 @@ Element
   - [] not a task
   - [x]not a task`;
 
+  export const BaseList3 = `
+- This is a list item.
+- This list is unordered.
+
+Here's how to include an image with alt text and a title:`;
+
+  export const BaseList4 = `
+- This is a list item.
+- This list is unordered.
+
+Here's how to include an image with alt text and a title:
+
+`;
+
   export const SampleImage1 =
     'https://atlas.kodevly.com/_next/image?url=https%3A%2F%2Fd22f1kls6ex9ii.cloudfront.net%2Fposts%2F6f46774c7c103ee%2Ffile1.avif&w=1920&q=75';
 

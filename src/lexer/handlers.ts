@@ -17,9 +17,12 @@ export namespace HANDLERS {
 
   export function newLineHandler(type: TOKEN.TOKEN_TYPE) {
     return (lexer: Lexer.Lexer, regex: RegExp, raw_value: string) => {
-      const last_element = lexer.tokens[lexer.tokens.length - 1];
+      const last_element = lexer.last_token;
+      const n_line = Factory.NEW_LINE();
       if (!(last_element && last_element.type == TOKEN.TOKEN_TYPE.UL)) {
-        lexer.push(Factory.NEW_LINE());
+        lexer.push(n_line);
+      } else {
+        lexer.setLast(n_line);
       }
       lexer.bump(raw_value.length);
       lexer.bumpLine();
@@ -33,7 +36,7 @@ export namespace HANDLERS {
         word: '',
       };
 
-      const last_element = lexer.tokens[lexer.tokens.length - 1];
+      const last_element = lexer.last_token;
 
       nestedSearch(PATTERNS.WORD_NESTED_PATTER, raw_value, type, tokens, word);
 
@@ -206,7 +209,7 @@ export namespace HANDLERS {
       let word = {
         word: '',
       };
-      const last_element = lexer.tokens[lexer.tokens.length - 1];
+      const last_element = lexer.last_token;
 
       nestedSearch(
         PATTERNS.PARAGRAPH_NESTED_PATTERNS,
@@ -255,7 +258,7 @@ export namespace HANDLERS {
       // extract body
       const len = lexer.tokens.length;
       let list: ListTokenBuilder;
-      const last_element = lexer.tokens[len - 1];
+      const last_element = lexer.last_pushed_token;
 
       if (last_element && last_element.type == TOKEN.TOKEN_TYPE.UL) {
         const list_token = lexer.tokens[len - 1] as ListToken;
