@@ -40,7 +40,7 @@ export namespace PATTERNS {
     },
     CODE_BLOCK: {
       regex: () =>
-        /((?<=[^`]|^)`{3}(?=[^`]|$))(.|\n)*((?<=[^`]|^)`{3}(?=[^`]|$))/g,
+        /((?<=[^`]|^)`{3}(?=[^`]|$))(.|\n)*?((?<=[^`]|^)`{3}(?=[^`]|$))/g,
       handler: HANDLERS.codeHandler(TOKEN.TOKEN_TYPE.CODE_BLOCK),
       type: TOKEN.TOKEN_TYPE.CODE_BLOCK,
     },

@@ -40,7 +40,29 @@ of images. You can provide pixels (`200`/`200px`), or a percentage (`50%`), for
 the width/height. The alignment can be either `left` or `right`, with images
 being centered by default. These settings are all optional._
 
-![](https://assets.digitalocean.com/public/mascot.png){ width=200 height=131
-align=left }
+![](https://assets.digitalocean.com/public/mascot.png)
 
-Use horizontal rules to break up long sections:
+## Step 2 — Code
+
+This is `inline code`. This is a <^>variable<^>. This is an
+`in-line code <^>variable<^>`. You can also have
+[`code` in links](https://www.digitalocean.com).
+
+Here's a configuration file with a label:
+
+```nginx
+[label /etc/nginx/sites-available/default]
+server {
+    listen 80 <^>default_server<^>;
+    . . .
+}
+```
+
+Examples can have line numbers, and every code block has a 'Copy' button to copy
+just the code:
+
+```js
+const test = 'hello';
+const other = 'world';
+console.log(test, other);
+```

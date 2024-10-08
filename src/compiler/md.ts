@@ -122,7 +122,7 @@ export class MDAdapter implements Adapter<Token> {
     const indentation = ' '.repeat(indent);
     let output = `${indentation}`;
 
-    output += `<a href="${token.body}">`;
+    output += `<a href="${token.body}" rel="ugc nofollow noopener" target="_blank">`;
     if (token.kind == 'Image') {
       output += '\n';
       output += indentation + ' '.repeat(this.BASE_INDENT);

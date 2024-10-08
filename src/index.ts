@@ -1,10 +1,14 @@
 import { TOKENIZER } from './lexer/tokenizer';
-export { TOKEN } from './token/token';
+export { TOKEN, Token } from './token/token';
 
 export function tokenize(source: string) {
   return TOKENIZER.tokenize(source);
 }
 
-export * from './compiler/compiler';
-export * from './compiler/md';
-export * from './token/factory';
+export {
+  Adapter,
+  TokenCompiler,
+  StringTokenCompiler,
+} from './compiler/compiler';
+export { MDAdapter } from './compiler/md';
+export { Factory } from './token/factory';
