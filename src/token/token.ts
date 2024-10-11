@@ -57,7 +57,6 @@ export class Token {
   }
 
   pushToChildren(token: Token) {
-    this._type = TOKEN.TOKEN_TYPE.UL;
     this._children.push(token);
   }
 
@@ -78,13 +77,10 @@ export class Token {
     return this._body;
   }
 
-  appendWord(token: Token) {
-    if (
-      this.type != TOKEN.TOKEN_TYPE.WORD ||
-      token.type != TOKEN.TOKEN_TYPE.WORD
-    )
-      return;
-    this._body += token.body;
+  appendWord(token: Word) {
+    if (this.type == TOKEN.TOKEN_TYPE.WORD) {
+      this._body += token.body;
+    }
   }
 
   equal(token: Token) {
@@ -123,6 +119,10 @@ export class Token {
 export class Word extends Token {
   constructor(body: string, children: Token[]) {
     super(TOKEN.TOKEN_TYPE.WORD, body, children);
+  }
+
+  appendWord(token: Word) {
+    super.appendWord(token);
   }
 }
 export class Paragraph extends Token {

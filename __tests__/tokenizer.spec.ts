@@ -508,16 +508,13 @@ describe('Parsing', () => {
       const expected = Factory.ROOT([
         Factory.NEW_LINE(),
         Factory.UL([
+          Factory.LI('A', []),
           Factory.UL([
-            Factory.WORD('A'),
-            Factory.UL([
-              Factory.WORD('Sub list of A'),
-              Factory.LI('Element of sub list of A', []),
-            ]),
+            Factory.LI('Sub list of A', []),
+            Factory.UL([Factory.LI('Element of sub list of A', [])]),
           ]),
-
+          Factory.LI('B', []),
           Factory.UL([
-            Factory.WORD('B'),
             Factory.LI('Sub list of BElement', []),
             Factory.LI('Sub list of B', []),
           ]),
@@ -582,20 +579,15 @@ describe('Parsing', () => {
       const expected = Factory.ROOT([
         Factory.NEW_LINE(),
         Factory.UL([
+          Factory.LI('A', []),
           Factory.UL([
-            Factory.WORD('A'),
-            Factory.CHECK_BOX_UL(false, [
-              Factory.CHECK_BOX(false, 'Sub task of A'),
-              Factory.CHECK_BOX(true, 'Checked task'),
-            ]),
+            Factory.CHECK_BOX(false, 'Sub task of A'),
+            Factory.UL([Factory.CHECK_BOX(true, 'Checked task')]),
           ]),
+          Factory.LI('B', []),
+          Factory.UL([Factory.CHECK_BOX(false, 'Sub task of B')]),
+          Factory.CHECK_BOX(false, 'Tasks C'),
           Factory.UL([
-            Factory.WORD('B'),
-            Factory.CHECK_BOX(false, 'Sub task of B'),
-          ]),
-
-          Factory.CHECK_BOX_UL(false, [
-            Factory.CHECK_BOX(false, 'Tasks C'),
             Factory.CHECK_BOX(false, 'Sub task of C'),
             Factory.LI('[] not a task', []),
             Factory.LI('[x]not a task', []),

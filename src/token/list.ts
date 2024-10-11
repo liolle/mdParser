@@ -1,6 +1,6 @@
 import { TOKENIZER } from '../lexer/tokenizer';
 import { Factory } from './factory';
-import { Token, TOKEN } from './token';
+import { Token, TOKEN, Word } from './token';
 
 export type LIST_TOKEN_TYPE =
   | TOKEN.TOKEN_TYPE.UL
@@ -10,7 +10,8 @@ export type LIST_TOKEN_TYPE =
 
 export class ListToken extends Token {
   private _depth: number;
-  private _last_modified_token: ListToken | null = null;
+  private _last_modified_li: ListToken | null = null;
+  private _last_modified_ul: ListToken | null = null;
   constructor(
     body: string,
     children: Token[],
@@ -25,45 +26,64 @@ export class ListToken extends Token {
     return this._depth;
   }
 
-  get last_modified_token() {
-    return this._last_modified_token;
+  get last_modified_li() {
+    return this._last_modified_li;
   }
 
-  #fuseParagraph(token: Token) {
+  get last_modified_ul() {
+    return this._last_modified_ul;
+  }
+
+  #fuseParagraph(body: string, tokens: Token[]) {
     let node = this.children[this.children.length - 1];
     while (node && node.children.length > 1) {
       node = node.children[node.children.length - 1];
     }
+    let last_node = this.last_modified_li;
 
-    const n = token.children.length;
+    if (!node || !last_node) {
+      return;
+    }
+
+    const n = tokens.length;
 
     let i = 0;
     for (; i < n; i++) {
-      const child = token.children[i];
-      if (!child || !node) break;
+      const child = tokens[i];
+      if (!child) break;
       if (child.type != TOKEN.TOKEN_TYPE.WORD) break;
-      if (node.children[0]) node.children[0].appendWord(child);
+      last_node.appendWord(child);
     }
 
     for (; i < n; i++) {
-      const child = token.children[i];
-      if (!child || !node) break;
+      const child = tokens[i];
+      if (!child) break;
       node.children.push(child);
     }
   }
 
-  setLastModified(token: ListToken) {
-    this._last_modified_token = token;
+  appendWord(token: Word) {
+    if (this.type == TOKEN.TOKEN_TYPE.LI) {
+      const len = this.children.length;
+      const last_child = this.children[len - 1];
+      if (last_child) {
+        last_child.appendWord(token);
+      } else {
+        this.children.push(token);
+      }
+    }
   }
 
-  fuse(token: Token) {
-    if (token.type == TOKEN.TOKEN_TYPE.PARAGRAPH) {
-      this.#fuseParagraph(token);
-    }
+  setLastModifiedLi(token: ListToken) {
+    this._last_modified_li = token;
+  }
 
-    if (token.type == TOKEN.TOKEN_TYPE.WORD) {
-      this.#fuseParagraph(token);
-    }
+  setLastModifiedUl(token: ListToken) {
+    this._last_modified_ul = token;
+  }
+
+  fuse(body: string, token: Token[]) {
+    this.#fuseParagraph(body, token);
   }
 
   print(indent: number = 0) {
@@ -77,27 +97,28 @@ export class ListToken extends Token {
   }
 }
 
-class NestedList {
-  private _stack: ListToken[] = [];
+export class ListTokenBuilder {
   private _token: ListToken;
+  private _last_pushed: ListToken | null = null;
+  private _tokens: ListToken[];
+  private _depth = 0;
 
-  constructor(token: ListToken) {
+  constructor(token = new ListToken('', [], 0, TOKEN.TOKEN_TYPE.UL)) {
     this._token = token;
-    this._stack.push(token);
-    if (token.last_modified_token) this._stack.push(token.last_modified_token);
+    this._tokens = [token];
+    if (token.last_modified_ul) {
+      this._tokens.push(token.last_modified_ul);
+    }
+    if (token.last_modified_li) {
+      this._last_pushed = token.last_modified_li;
+    }
   }
 
-  pushElement(body: string, depth: number) {
-    let node = this.#last;
-    while (node && depth <= node.depth) {
-      this._stack.pop();
-      node = this.#last;
-    }
-    if (!node) return;
-    const new_node = this.#getNestedNode(body, depth);
-    node.pushToChildren(new_node);
-    this._stack.push(new_node);
-    this._token.setLastModified(node);
+  pushElement(raw_value: string) {
+    if (raw_value == '') return;
+    const [spaces, body] = raw_value.split('- ');
+    let depth = (spaces ? spaces.length : 0) + 1;
+    this.pushEl(body || '', depth);
   }
 
   #getNestedNode(body: string, depth: number): ListToken {
@@ -113,38 +134,56 @@ class NestedList {
     return Factory.LI('', TOKENIZER.tokenize(body), depth);
   }
 
+  pushEl(body: string, depth: number) {
+    const d = this._depth;
+    const node = this.#findUl(depth);
+    if (!node) {
+      console.log(body, depth);
+      return;
+    }
+    this._last_pushed = this.#getNestedNode(body, depth);
+    node.pushToChildren(this._last_pushed);
+    this._token.setLastModifiedUl(node);
+    this._token.setLastModifiedLi(this._last_pushed);
+  }
+
+  #findUl(depth: number) {
+    let last_ul = this.#last;
+    let last_node = this._last_pushed;
+
+    if (!last_ul) {
+      return;
+    }
+
+    if (!last_node || depth == last_node.depth) {
+      return last_ul;
+    }
+
+    if (depth > last_node.depth) {
+      const ul = new ListToken('', [], depth, TOKEN.TOKEN_TYPE.UL);
+      last_ul.pushToChildren(ul);
+      this._tokens.push(ul);
+      return ul;
+    } else {
+      while (last_ul && depth < last_ul.depth) {
+        this._tokens.pop();
+        last_ul = this.#last;
+      }
+
+      return last_ul;
+    }
+  }
+
   get #size() {
-    return this._stack.length;
+    return this._tokens.length;
   }
 
   get #last() {
-    return this._stack[this.#size - 1];
+    return this._tokens[this.#size - 1];
   }
 
   get token() {
     return this._token;
-  }
-}
-
-export class ListTokenBuilder {
-  private list: NestedList;
-  private _token: ListToken;
-
-  constructor(token = new ListToken('', [], 0, TOKEN.TOKEN_TYPE.UL)) {
-    this._token = token;
-    this.list = new NestedList(this._token);
-  }
-
-  pushElement(raw_value: string) {
-    if (raw_value == '') return;
-    const [spaces, body] = raw_value.split('- ');
-    let depth = (spaces ? spaces.length : 0) + 1;
-
-    this.list.pushElement(body || '', depth);
-  }
-
-  get token() {
-    return this.list.token;
   }
 }
 

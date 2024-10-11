@@ -39,10 +39,9 @@ export namespace HANDLERS {
       const last_element = lexer.last_token;
 
       nestedSearch(PATTERNS.WORD_NESTED_PATTER, raw_value, type, tokens, word);
-
       if (last_element && last_element.type == TOKEN.TOKEN_TYPE.UL) {
         const list_token = lexer.tokens[lexer.tokens.length - 1] as ListToken;
-        list_token.fuse(new Token(type, word.word, tokens));
+        list_token.fuse(word.word, tokens);
       } else {
         if (tokens.length > 0) {
           for (const t of tokens) {
@@ -221,7 +220,7 @@ export namespace HANDLERS {
 
       if (last_element && last_element.type == TOKEN.TOKEN_TYPE.UL) {
         const list_token = lexer.tokens[lexer.tokens.length - 1] as ListToken;
-        list_token.fuse(new Token(type, word.word, tokens));
+        list_token.fuse(word.word, tokens);
       } else {
         lexer.push(new Token(type, word.word, tokens));
       }
