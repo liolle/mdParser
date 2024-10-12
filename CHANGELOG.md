@@ -1,5 +1,11 @@
 # md-parser
 
+## 2.0.7
+
+### Patch Changes
+
+- a79e78b: Fix: new line after list, codeblock language
+
 ## 2.0.6
 
 ### Patch Changes
