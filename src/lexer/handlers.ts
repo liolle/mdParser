@@ -17,13 +17,18 @@ export namespace HANDLERS {
 
   export function newLineHandler(type: TOKEN.TOKEN_TYPE) {
     return (lexer: Lexer.Lexer, regex: RegExp, raw_value: string) => {
-      const last_element = lexer.last_token;
+      const last_element = lexer.last_pushed_token;
       const n_line = Factory.NEW_LINE();
-      if (!(last_element && last_element.type == TOKEN.TOKEN_TYPE.UL)) {
-        lexer.push(n_line);
-      } else {
-        lexer.setLast(n_line);
+
+      switch (true) {
+        case last_element instanceof ListToken:
+          last_element.bumpNewlineCount();
+          break;
+        default:
+          lexer.push(n_line);
+          break;
       }
+
       lexer.bump(raw_value.length);
       lexer.bumpLine();
     };
@@ -36,20 +41,32 @@ export namespace HANDLERS {
         word: '',
       };
 
-      const last_element = lexer.last_token;
-
+      const last_pushed_token = lexer.last_pushed_token;
       nestedSearch(PATTERNS.WORD_NESTED_PATTER, raw_value, type, tokens, word);
-      if (last_element && last_element.type == TOKEN.TOKEN_TYPE.UL) {
-        const list_token = lexer.tokens[lexer.tokens.length - 1] as ListToken;
-        list_token.fuse(word.word, tokens);
-      } else {
-        if (tokens.length > 0) {
-          for (const t of tokens) {
-            lexer.push(t);
+
+      switch (true) {
+        case last_pushed_token instanceof ListToken:
+          if (last_pushed_token.is_out) {
+            if (tokens.length > 0) {
+              for (const t of tokens) {
+                lexer.push(t);
+              }
+            } else {
+              lexer.push(Factory.WORD(word.word));
+            }
+          } else {
+            last_pushed_token.fuse(word.word, tokens);
           }
-        } else {
-          lexer.push(Factory.WORD(word.word));
-        }
+          break;
+        default:
+          if (tokens.length > 0) {
+            for (const t of tokens) {
+              lexer.push(t);
+            }
+          } else {
+            lexer.push(Factory.WORD(word.word));
+          }
+          break;
       }
 
       lexer.bump(raw_value.length);
@@ -176,7 +193,6 @@ export namespace HANDLERS {
 
         case TOKEN.TOKEN_TYPE.INLINE_CODE:
           size = 1;
-
           break;
 
         default:
@@ -192,7 +208,6 @@ export namespace HANDLERS {
       };
 
       nestedSearch(patterns, body, type, tokens, word);
-
       lexer.push(new Token(type, word.word, tokens));
       lexer.bump(raw_value.length);
 
@@ -218,11 +233,17 @@ export namespace HANDLERS {
         word,
       );
 
-      if (last_element && last_element.type == TOKEN.TOKEN_TYPE.UL) {
-        const list_token = lexer.tokens[lexer.tokens.length - 1] as ListToken;
-        list_token.fuse(word.word, tokens);
-      } else {
-        lexer.push(new Token(type, word.word, tokens));
+      switch (true) {
+        case last_element instanceof ListToken:
+          if (last_element.is_out) {
+            lexer.push(new Token(type, word.word, tokens));
+          } else {
+            last_element.fuse(word.word, tokens);
+          }
+          break;
+        default:
+          lexer.push(new Token(type, word.word, tokens));
+          break;
       }
 
       lexer.bump(raw_value.length);
@@ -244,7 +265,6 @@ export namespace HANDLERS {
       };
 
       nestedSearch(PATTERNS.HEADER_NESTED_PATTERNS, body, type, tokens, word);
-
       lexer.push(new Heading(type as HEADING_TYPE, word.word, tokens));
       lexer.bump(raw_value.length);
 
@@ -255,23 +275,24 @@ export namespace HANDLERS {
   export function listHandler(type: TOKEN.TOKEN_TYPE) {
     return (lexer: Lexer.Lexer, regex: RegExp, raw_value: string) => {
       // extract body
-      const len = lexer.tokens.length;
+
       let list: ListTokenBuilder;
       const last_element = lexer.last_pushed_token;
+      switch (true) {
+        case last_element instanceof ListToken:
+          list = new ListTokenBuilder(last_element);
+          for (const line of raw_value.split('\n')) {
+            list.pushElement(line);
+          }
+          break;
+        default:
+          list = new ListTokenBuilder();
+          for (const line of raw_value.split('\n')) {
+            list.pushElement(line);
+          }
 
-      if (last_element && last_element.type == TOKEN.TOKEN_TYPE.UL) {
-        const list_token = lexer.tokens[len - 1] as ListToken;
-        const list = new ListTokenBuilder(list_token);
-        for (const line of raw_value.split('\n')) {
-          list.pushElement(line);
-        }
-      } else {
-        list = new ListTokenBuilder();
-        for (const line of raw_value.split('\n')) {
-          list.pushElement(line);
-        }
-
-        lexer.push(list.token);
+          lexer.push(list.token);
+          break;
       }
 
       lexer.bump(raw_value.length);

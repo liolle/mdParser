@@ -46,11 +46,11 @@ export namespace PATTERNS {
     },
     SPACE: {
       regex: () => / /g,
-      handler: HANDLERS.defaultHandler(TOKEN.TOKEN_TYPE.SPACE),
-      type: TOKEN.TOKEN_TYPE.SPACE,
+      handler: HANDLERS.wordHandler(TOKEN.TOKEN_TYPE.WORD),
+      type: TOKEN.TOKEN_TYPE.WORD,
     },
     WORD: {
-      regex: () => /[^\n\\]+/g,
+      regex: () => /[^\n]+/g,
       handler: HANDLERS.wordHandler(TOKEN.TOKEN_TYPE.WORD),
       type: TOKEN.TOKEN_TYPE.WORD,
     },

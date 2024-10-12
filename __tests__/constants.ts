@@ -45,6 +45,19 @@ Here's how to include an image with alt text and a title:
 
 `;
 
+  export const Tasklist1 = `
+- A
+  - Sub list of A
+[ ] should not be a task
+  - Sub list of A`;
+
+  export const Tasklist2 = `
+- A
+  - Sub list of A
+[ ] should not be a task, and it should be appended to the last li,
+ this should also be appended to the last li
+  - Sub list of A`;
+
   export const SampleImage1 =
     'https://atlas.kodevly.com/_next/image?url=https%3A%2F%2Fd22f1kls6ex9ii.cloudfront.net%2Fposts%2F6f46774c7c103ee%2Ffile1.avif&w=1920&q=75';
 

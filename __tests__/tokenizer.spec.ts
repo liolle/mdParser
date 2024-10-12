@@ -601,6 +601,51 @@ describe('Parsing', () => {
 
       expect(actual.equal(expected)).toEqual(true);
     });
+
+    test('TaskList1', () => {
+      const actual = Factory.ROOT(TOKENIZER.tokenize(CONSTANT.Tasklist1));
+
+      const expected = Factory.ROOT([
+        Factory.NEW_LINE(),
+        Factory.UL([
+          Factory.LI('A', []),
+          Factory.UL([
+            Factory.LI('Sub list of A[ ] should not be a task', []),
+            Factory.LI('Sub list of A', []),
+          ]),
+        ]),
+      ]);
+
+      onTestFailed(e => {
+        expect(actual.print()).toEqual(expected.print());
+      });
+
+      expect(actual.equal(expected)).toEqual(true);
+    });
+
+    test('TaskList2', () => {
+      const actual = Factory.ROOT(TOKENIZER.tokenize(CONSTANT.Tasklist2));
+
+      const expected = Factory.ROOT([
+        Factory.NEW_LINE(),
+        Factory.UL([
+          Factory.LI('A', []),
+          Factory.UL([
+            Factory.LI(
+              'Sub list of A[ ] should not be a task, and it should be appended to the last li, this should also be appended to the last li',
+              [],
+            ),
+            Factory.LI('Sub list of A', []),
+          ]),
+        ]),
+      ]);
+
+      onTestFailed(e => {
+        expect(actual.print()).toEqual(expected.print());
+      });
+
+      expect(actual.equal(expected)).toEqual(true);
+    });
   });
 
   suite('Code', () => {

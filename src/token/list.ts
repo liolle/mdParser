@@ -12,6 +12,8 @@ export class ListToken extends Token {
   private _depth: number;
   private _last_modified_li: ListToken | null = null;
   private _last_modified_ul: ListToken | null = null;
+  private _new_line_count = 0;
+  private MAX_NEW_LINE = 1;
   constructor(
     body: string,
     children: Token[],
@@ -20,6 +22,22 @@ export class ListToken extends Token {
   ) {
     super(kind, body, children || []);
     this._depth = depth;
+  }
+
+  get new_line_count() {
+    return this._new_line_count;
+  }
+
+  bumpNewlineCount() {
+    this._new_line_count++;
+  }
+
+  get is_out() {
+    return this.new_line_count >= this.MAX_NEW_LINE;
+  }
+
+  resetLineCount() {
+    this._new_line_count = 0;
   }
 
   get depth() {
@@ -60,6 +78,7 @@ export class ListToken extends Token {
       if (!child) break;
       node.children.push(child);
     }
+    this._new_line_count--;
   }
 
   appendWord(token: Word) {
@@ -138,7 +157,6 @@ export class ListTokenBuilder {
     const d = this._depth;
     const node = this.#findUl(depth);
     if (!node) {
-      console.log(body, depth);
       return;
     }
     this._last_pushed = this.#getNestedNode(body, depth);
