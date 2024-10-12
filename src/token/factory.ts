@@ -97,7 +97,7 @@ export class Factory {
     return new InlineCode(body);
   }
 
-  static CODE_BLOCK(body: string, language: SUPPORTED_LANGUAGES) {
+  static CODE_BLOCK(body: string, language: string) {
     return new CodeToken(TOKEN.TOKEN_TYPE.CODE_BLOCK, body, language);
   }
 

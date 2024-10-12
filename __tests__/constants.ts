@@ -68,6 +68,10 @@ Here's how to include an image with alt text and a title:
 }
   `;
 
+  export const code3 = `def add(a,b):
+  return a+b
+  `;
+
   export const CodeBlock1 = `
 ${'```'} js
 ${code1}
@@ -78,4 +82,9 @@ let message = 'Hello world';
 alert(message);
 ${'```'}
 `;
+
+  export const CodeBlock3 = `
+${'```'} py
+${code3}
+${'```'}`;
 }

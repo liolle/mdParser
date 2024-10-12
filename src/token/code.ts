@@ -5,24 +5,13 @@ export enum SUPPORTED_LANGUAGES {
   DEFAULT = '',
 }
 
-export function resolveLanguage(language: string): SUPPORTED_LANGUAGES {
-  // js
-  const candidate = language.trim().toLowerCase();
-  if (/js|javascript/.test(candidate)) return SUPPORTED_LANGUAGES.JS;
-  return SUPPORTED_LANGUAGES.DEFAULT;
-}
-
 type CODE_TOKEN_TYPE =
   | TOKEN.TOKEN_TYPE.INLINE_CODE
   | TOKEN.TOKEN_TYPE.CODE_BLOCK;
 
 export class CodeToken extends Token {
-  private _language: SUPPORTED_LANGUAGES;
-  constructor(
-    type: CODE_TOKEN_TYPE,
-    body: string,
-    language = SUPPORTED_LANGUAGES.DEFAULT,
-  ) {
+  private _language: string;
+  constructor(type: CODE_TOKEN_TYPE, body: string, language = '') {
     super(type, body.trim(), []);
     this._language = language;
   }

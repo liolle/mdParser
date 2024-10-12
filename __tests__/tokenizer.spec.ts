@@ -661,12 +661,27 @@ describe('Parsing', () => {
       expect(actual.equal(expected)).toEqual(true);
     });
 
-    test('Block code', () => {
+    test('Block code1', () => {
       const actual = Factory.ROOT(TOKENIZER.tokenize(CONSTANT.CodeBlock1));
 
       const expected = Factory.ROOT([
         Factory.NEW_LINE(),
-        Factory.CODE_BLOCK(CONSTANT.code1, SUPPORTED_LANGUAGES.JS),
+        Factory.CODE_BLOCK(CONSTANT.code1, 'js'),
+      ]);
+
+      onTestFailed(e => {
+        expect(actual.print()).toEqual(expected.print());
+      });
+
+      expect(actual.equal(expected)).toEqual(true);
+    });
+
+    test('Block code3', () => {
+      const actual = Factory.ROOT(TOKENIZER.tokenize(CONSTANT.CodeBlock3));
+
+      const expected = Factory.ROOT([
+        Factory.NEW_LINE(),
+        Factory.CODE_BLOCK(CONSTANT.code3, 'py'),
       ]);
 
       onTestFailed(e => {

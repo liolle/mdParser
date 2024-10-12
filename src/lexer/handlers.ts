@@ -1,8 +1,7 @@
-import { resolveLanguage } from '../token/code';
 import { Factory } from '../token/factory';
-import { LinkToken, LINK_TOKEN_TYPE } from '../token/links';
+import { LINK_TOKEN_TYPE, LinkToken } from '../token/links';
 import { ListToken, ListTokenBuilder } from '../token/list';
-import { Heading, HEADING_TYPE, Token, TOKEN, Word } from '../token/token';
+import { Heading, HEADING_TYPE, Token, TOKEN } from '../token/token';
 import { Lexer } from './lexer';
 import { Pattern, PATTERNS } from './patterns';
 import { TOKENIZER } from './tokenizer';
@@ -152,7 +151,7 @@ export namespace HANDLERS {
 
         case TOKEN.TOKEN_TYPE.CODE_BLOCK:
           const parts = raw_value.slice(3, raw_value.length - 3).split('\n');
-          const lg = resolveLanguage(parts.shift() || '');
+          const lg = (parts.shift() || '').trim().toLowerCase();
           body = parts.join('\n');
           lexer.push(Factory.CODE_BLOCK(body, lg));
           break;
