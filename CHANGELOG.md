@@ -1,5 +1,11 @@
 # md-parser
 
+## 2.0.6
+
+### Patch Changes
+
+- 761aa24: Fix: new line in list
+
 ## 2.0.5
 
 ### Patch Changes
