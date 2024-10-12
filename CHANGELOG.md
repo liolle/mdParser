@@ -1,5 +1,11 @@
 # md-parser
 
+## 2.0.8
+
+### Patch Changes
+
+- 3c70acb: Update: paragraph & list interaction
+
 ## 2.0.7
 
 ### Patch Changes
