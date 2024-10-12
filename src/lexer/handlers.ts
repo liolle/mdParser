@@ -11,6 +11,7 @@ export namespace HANDLERS {
     return (lexer: Lexer.Lexer, regex: RegExp, raw_value: string) => {
       lexer.push(Factory.WORD(raw_value));
       lexer.bump(raw_value.length);
+      return true;
     };
   }
 
@@ -34,6 +35,7 @@ export namespace HANDLERS {
 
       lexer.bump(raw_value.length);
       lexer.bumpLine();
+      return true;
     };
   }
 
@@ -73,6 +75,7 @@ export namespace HANDLERS {
       }
 
       lexer.bump(raw_value.length);
+      return true;
     };
   }
 
@@ -129,6 +132,7 @@ export namespace HANDLERS {
         ),
       );
       lexer.bump(raw_value.length);
+      return true;
     };
   }
 
@@ -138,6 +142,7 @@ export namespace HANDLERS {
 
       lexer.push(new Token(type, body, []));
       lexer.bump(raw_value.length);
+      return true;
     };
   }
 
@@ -238,12 +243,7 @@ export namespace HANDLERS {
 
       switch (true) {
         case last_element instanceof ListToken:
-          if (last_element.is_out) {
-            lexer.push(new Token(type, word.word, tokens));
-          } else {
-            last_element.fuse(word.word, tokens);
-          }
-          break;
+          return false;
         default:
           lexer.push(new Token(type, word.word, tokens));
           break;

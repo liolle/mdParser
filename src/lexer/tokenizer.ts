@@ -17,8 +17,7 @@ export namespace TOKENIZER {
       for (const pattern of options.patterns) {
         const exec_res = pattern.regex().exec(lexer.remainder());
 
-        if (!exec_res) continue;
-        if (exec_res['index'] != 0) {
+        if (!exec_res || exec_res['index'] != 0) {
           continue;
         }
 
@@ -32,7 +31,10 @@ export namespace TOKENIZER {
         )
           continue;
 
-        pattern.handler(lexer, pattern.regex(), exec_res[0]);
+        const consumed = pattern.handler(lexer, pattern.regex(), exec_res[0]);
+        if (!consumed) {
+          continue;
+        }
         found = true;
         break;
       }

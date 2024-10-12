@@ -175,6 +175,26 @@ describe('Parsing', () => {
       );
       const expected = Factory.ROOT([
         Factory.PARAGRAPH([Factory.WORD('This is a paragraph.')]),
+        Factory.NEW_LINE(),
+      ]);
+
+      onTestFailed(e => {
+        expect(actual.print()).toEqual(expected.print());
+      });
+
+      expect(actual.equal(expected)).toEqual(true);
+    });
+
+    test('Multiple line paragraph', () => {
+      const actual = Factory.ROOT(
+        TOKENIZER.tokenize(
+          'first line of p1.\nsecond line of p1\n\nfirst line of p2.\nsecond line of p2\n',
+        ),
+      );
+      const expected = Factory.ROOT([
+        Factory.PARAGRAPH([Factory.WORD('first line of p1.second line of p1')]),
+        Factory.NEW_LINE(),
+        Factory.PARAGRAPH([Factory.WORD('first line of p2.second line of p2')]),
       ]);
 
       onTestFailed(e => {
@@ -559,11 +579,11 @@ describe('Parsing', () => {
           Factory.LI('This is a list item.', []),
           Factory.LI('This list is unordered.', []),
         ]),
-        Factory.PARAGRAPH([
-          Factory.WORD(
-            `Here's how to include an image with alt text and a title:`,
-          ),
-        ]),
+        Factory.WORD(
+          `Here's how to include an image with alt text and a title:`,
+        ),
+        Factory.NEW_LINE(),
+        Factory.NEW_LINE(),
       ]);
 
       onTestFailed(e => {
@@ -589,6 +609,7 @@ describe('Parsing', () => {
             `Here's how to include an image with alt text and a title:`,
           ),
         ]),
+        Factory.NEW_LINE(),
       ]);
 
       onTestFailed(e => {

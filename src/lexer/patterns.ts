@@ -5,7 +5,7 @@ import { Lexer } from './lexer';
 export type Pattern = {
   regex: () => RegExp;
   type: TOKEN.TOKEN_TYPE;
-  handler: (lexer: Lexer.Lexer, regex: RegExp, raw_value: string) => void;
+  handler: (lexer: Lexer.Lexer, regex: RegExp, raw_value: string) => boolean;
 };
 
 export namespace PATTERNS {
@@ -96,7 +96,7 @@ export namespace PATTERNS {
       type: TOKEN.TOKEN_TYPE.ESCAPE,
     },
     PARAGRAPH: {
-      regex: () => /.(\n|.)+?\n\n/g,
+      regex: () => /([^\n]+\n)+/g,
       handler: HANDLERS.paragraphHandler(TOKEN.TOKEN_TYPE.PARAGRAPH, ''),
       type: TOKEN.TOKEN_TYPE.PARAGRAPH,
     },
