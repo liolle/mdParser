@@ -619,6 +619,26 @@ describe('Parsing', () => {
       expect(actual.equal(expected)).toEqual(true);
     });
 
+    test('2 list separated by new lines', () => {
+      const actual = Factory.ROOT(TOKENIZER.tokenize(CONSTANT.BaseList6));
+
+      const expected = Factory.ROOT([
+        Factory.NEW_LINE(),
+        Factory.UL([Factory.LI('first list.', [])]),
+        Factory.NEW_LINE(),
+        Factory.NEW_LINE(),
+        Factory.NEW_LINE(),
+        Factory.UL([Factory.LI('second list.', [])]),
+        Factory.NEW_LINE(),
+      ]);
+
+      onTestFailed(e => {
+        expect(actual.print()).toEqual(expected.print());
+      });
+
+      expect(actual.equal(expected)).toEqual(true);
+    });
+
     test('TaskList', () => {
       const actual = Factory.ROOT(TOKENIZER.tokenize(CONSTANT.BaseList2));
 

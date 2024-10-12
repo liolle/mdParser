@@ -106,12 +106,12 @@ export namespace PATTERNS {
       type: TOKEN.TOKEN_TYPE.EXTERNAL_LINK,
     },
     UL: {
-      regex: () => /[ \t]*- [^\n]*(\s*- [^\n]*\n?)*/g,
+      regex: () => /(([ \t]*- [^\n]+)\n?)+/g,
       handler: HANDLERS.listHandler(TOKEN.TOKEN_TYPE.UL),
       type: TOKEN.TOKEN_TYPE.UL,
     },
     LI: {
-      regex: () => /[ \t]*- [^\n]*(\s*- [^\n]*\n?)/g,
+      regex: () => /([ \t]*- [^\n]+)\n?/g,
       handler: HANDLERS.listHandler(TOKEN.TOKEN_TYPE.UL),
       type: TOKEN.TOKEN_TYPE.LI,
     },
