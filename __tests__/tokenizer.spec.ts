@@ -573,6 +573,31 @@ describe('Parsing', () => {
       expect(actual.equal(expected)).toEqual(true);
     });
 
+    test('New line after in list', () => {
+      const actual = Factory.ROOT(TOKENIZER.tokenize(CONSTANT.BaseList5));
+
+      const expected = Factory.ROOT([
+        Factory.NEW_LINE(),
+        Factory.UL([
+          Factory.LI('This is a list item.', []),
+          Factory.LI('This list is unordered.', []),
+        ]),
+        Factory.NEW_LINE(),
+        Factory.NEW_LINE(),
+        Factory.PARAGRAPH([
+          Factory.WORD(
+            `Here's how to include an image with alt text and a title:`,
+          ),
+        ]),
+      ]);
+
+      onTestFailed(e => {
+        expect(actual.print()).toEqual(expected.print());
+      });
+
+      expect(actual.equal(expected)).toEqual(true);
+    });
+
     test('TaskList', () => {
       const actual = Factory.ROOT(TOKENIZER.tokenize(CONSTANT.BaseList2));
 

@@ -21,7 +21,11 @@ export namespace HANDLERS {
 
       switch (true) {
         case last_element instanceof ListToken:
-          last_element.bumpNewlineCount();
+          if (!last_element.is_out) {
+            last_element.bumpNewlineCount();
+          } else {
+            lexer.push(n_line);
+          }
           break;
         default:
           lexer.push(n_line);
