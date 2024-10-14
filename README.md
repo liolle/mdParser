@@ -13,18 +13,15 @@ npm install @edllx/md-parser
 
 ## Features
 
-| Name           |          |
-| -------------- | -------- |
-| Heading        | &#x2705; |
-| Unordered list | &#x2705; |
-| Bold           | &#x2705; |
-| Italic         | &#x2705; |
-| Links          | &#x2705; |
-| Inline code    | &#x2705; |
-| Tables         | &#x274c; |
-| Ordered list   | &#x274c; |
-| Quotes         | &#x274c; |
-| Unicode        | &#x274c; |
+| Name           |          |              |          |
+| -------------- | -------- | ------------ | -------- |
+| Heading        | &#x2705; | Tables       | &#x274c; |
+| Unordered list | &#x2705; | Ordered list | &#x274c; |
+| Bold           | &#x2705; | Quotes       | &#x274c; |
+| Italic         | &#x2705; | Unicode      | &#x274c; |
+| Links          | &#x2705; |              |          |
+| Inline code    | &#x2705; |              |          |
+| Code block     | &#x2705; |              |          |
 
 ## Usage
 
