@@ -35,7 +35,7 @@ const root: Token = Factory.ROOT(tokens);
 
 ### Create and adapter
 
-Here is the
+Here is an
 [example](https://github.com/liolle/mdPreviewer/blob/main/src/components/preview/mdadapter.tsx)
 
 ```ts
