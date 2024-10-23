@@ -1,5 +1,11 @@
 # md-parser
 
+## 2.0.11
+
+### Patch Changes
+
+- ce53422: [Fix] words overlapping token ranges
+
 ## 2.0.10
 
 ### Patch Changes
