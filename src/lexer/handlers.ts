@@ -102,12 +102,12 @@ export namespace HANDLERS {
       for (const pattern of PATTERNS.EXTERNAL_LINK_NESTED_PATTER) {
         const exec_res = pattern.regex().exec(name || '');
         if (!exec_res) continue;
-
         next_idx = Math.min(next_idx, exec_res['index']);
       }
 
       if (next_idx != Infinity) {
-        if (next_idx > 0) {
+        const word = name.slice(0, next_idx);
+        if (word.length > 0) {
           tokens.push(Factory.WORD(name.slice(0, next_idx)));
         }
 

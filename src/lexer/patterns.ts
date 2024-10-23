@@ -141,7 +141,6 @@ export namespace PATTERNS {
     PAT.ITALIC,
     PAT.STRIKETHROUGH,
     PAT.HIGHLIGHT,
-    PAT.SPACE,
     PAT.WORD,
   ];
   export const PARAGRAPH_NESTED_PATTERNS: Pattern[] = [
