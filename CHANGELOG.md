@@ -1,5 +1,13 @@
 # md-parser
 
+## 2.0.9
+
+### Patch Changes
+
+- e1ea377: [Fix] Link pasing (make the links pattern ungreedy)
+
+  [Update] Nested image in link
+
 ## 2.0.8
 
 ### Patch Changes
