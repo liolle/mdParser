@@ -101,7 +101,7 @@ export namespace PATTERNS {
       type: TOKEN.TOKEN_TYPE.PARAGRAPH,
     },
     EXTERNAL_LINK: {
-      regex: () => /!?\[[^\n]*?\]\([^\n]*?\)\n?/g,
+      regex: () => /!?\[([^\n\]\[]|!\[[^\n]+\]\([^\n]+\))*?\]\([^\n]*?\)\n?/g,
       handler: HANDLERS.externalLinkHandler(TOKEN.TOKEN_TYPE.EXTERNAL_LINK),
       type: TOKEN.TOKEN_TYPE.EXTERNAL_LINK,
     },
@@ -213,6 +213,7 @@ export namespace PATTERNS {
 
   export const EXTERNAL_LINK_NESTED_PATTER: Pattern[] = [
     //
+    PAT.EXTERNAL_LINK,
     PAT.ESCAPE,
     PAT.BOLD,
     PAT.ITALIC,

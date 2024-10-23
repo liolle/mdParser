@@ -94,7 +94,7 @@ export namespace HANDLERS {
 
       const [name, url] = [
         name_array ? name_array[0] : '',
-        url_arr ? url_arr[0] : '',
+        url_arr ? url_arr[url_arr.length - 1] : '',
       ];
 
       let next_idx = Infinity;
@@ -102,26 +102,22 @@ export namespace HANDLERS {
       for (const pattern of PATTERNS.EXTERNAL_LINK_NESTED_PATTER) {
         const exec_res = pattern.regex().exec(name || '');
         if (!exec_res) continue;
-        if (
-          exec_res['index'] != 0 ||
-          (pattern.type != type && pattern.type != TOKEN.TOKEN_TYPE.WORD)
-        ) {
-          next_idx = Math.min(next_idx, exec_res['index']);
-        }
+
+        next_idx = Math.min(next_idx, exec_res['index']);
       }
 
       if (next_idx != Infinity) {
-        const word = name ? name.slice(0, next_idx) : '';
-        if (word.length > 0) {
-          tokens.push(new Token(TOKEN.TOKEN_TYPE.WORD, word, []));
+        if (next_idx > 0) {
+          tokens.push(Factory.WORD(name.slice(0, next_idx)));
         }
+
         tokens.push(
           ...TOKENIZER.tokenize(name ? name.slice(next_idx) : '', {
             patterns: PATTERNS.EXTERNAL_LINK_NESTED_PATTER,
           }),
         );
       } else if (name && name != '') {
-        tokens.push(new Token(TOKEN.TOKEN_TYPE.WORD, name, []));
+        tokens.push(Factory.WORD(name));
       }
 
       lexer.push(

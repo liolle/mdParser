@@ -2,6 +2,7 @@ import { TOKEN, Token } from './token';
 
 export enum LINK_TOKEN_TYPE {
   DEFAULT = 'Default',
+  NESTED_IMG = 'Nested_img',
   IMAGE = 'Image',
 }
 

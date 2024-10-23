@@ -116,10 +116,14 @@ export class Factory {
     return new LinkToken(link, [], LINK_TOKEN_TYPE.IMAGE);
   }
 
-  static LINK(link: string, name: string) {
+  static LINK(link: string, name: string, type = LINK_TOKEN_TYPE.DEFAULT) {
     if (name != '') {
-      return new LinkToken(link, [Factory.WORD(name)], LINK_TOKEN_TYPE.DEFAULT);
+      return new LinkToken(link, [Factory.WORD(name)], type);
     }
     return new LinkToken(link, [], LINK_TOKEN_TYPE.DEFAULT);
+  }
+
+  static NESTED_LINK_IMG(link: string, token: LinkToken) {
+    return new LinkToken(link, [token], LINK_TOKEN_TYPE.NESTED_IMG);
   }
 }

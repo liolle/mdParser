@@ -439,6 +439,24 @@ describe('Parsing', () => {
       expect(actual.equal(expected)).toEqual(true);
     });
 
+    test('Image in link', () => {
+      const actual = Factory.ROOT(
+        TOKENIZER.tokenize('[![Image](https://image.com)](https://link.com)'),
+      );
+      const expected = Factory.ROOT([
+        Factory.NESTED_LINK_IMG(
+          'https://link.com',
+          Factory.LINK('https://image.com', 'Image'),
+        ),
+      ]);
+
+      onTestFailed(e => {
+        expect(actual.print()).toEqual(expected.print());
+      });
+
+      expect(actual.equal(expected)).toEqual(true);
+    });
+
     // Images
 
     test('External image (no name)', () => {
