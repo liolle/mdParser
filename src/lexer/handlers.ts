@@ -120,13 +120,14 @@ export namespace HANDLERS {
         tokens.push(Factory.WORD(name));
       }
 
-      lexer.push(
-        new LinkToken(
-          url || '',
-          tokens,
-          offset == 2 ? LINK_TOKEN_TYPE.IMAGE : LINK_TOKEN_TYPE.DEFAULT,
-        ),
-      );
+      let kind = offset == 2 ? LINK_TOKEN_TYPE.IMAGE : LINK_TOKEN_TYPE.DEFAULT;
+
+      if (tokens[0] instanceof LinkToken) {
+        lexer.push(Factory.NESTED_LINK_IMG(url || '', tokens[0]));
+      } else {
+        lexer.push(new LinkToken(url || '', tokens, kind));
+      }
+
       lexer.bump(raw_value.length);
       return true;
     };

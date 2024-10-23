@@ -4,6 +4,7 @@ import { SUPPORTED_LANGUAGES } from '../src/token/code';
 import { Factory } from '../src/token/factory';
 import { TOKEN } from '../src/token/token';
 import { CONSTANT } from './constants';
+import { LINK_TOKEN_TYPE } from '../src';
 
 describe('Parsing', () => {
   suite('Base case', () => {
@@ -446,7 +447,7 @@ describe('Parsing', () => {
       const expected = Factory.ROOT([
         Factory.NESTED_LINK_IMG(
           'https://link.com',
-          Factory.LINK('https://image.com', 'Image'),
+          Factory.LINK('https://image.com', 'Image', LINK_TOKEN_TYPE.IMAGE),
         ),
       ]);
 

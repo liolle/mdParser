@@ -34,6 +34,10 @@ export class LinkToken extends Token {
     return super.body != undefined && super.body != '';
   }
 
+  equal(token: LinkToken): boolean {
+    return super.equal(token) && this.kind == token.kind;
+  }
+
   print(indent: number = 0) {
     const indentation = ' '.repeat(indent);
     let output = `${indentation}[${this.type}]: ${super.body || ''}`;
