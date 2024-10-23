@@ -477,6 +477,27 @@ describe('Parsing', () => {
       expect(actual.equal(expected)).toEqual(true);
     });
 
+    test('Header with Two link separated by word', () => {
+      const actual = Factory.ROOT(
+        TOKENIZER.tokenize(
+          '# [title1](https://link1.com)  [title2](https://link2.com)',
+        ),
+      );
+      const expected = Factory.ROOT([
+        Factory.HEADING('', 1, [
+          Factory.LINK('https://link1.com', 'title1'),
+          Factory.WORD('  '),
+          Factory.LINK('https://link2.com', 'title2'),
+        ]),
+      ]);
+
+      onTestFailed(e => {
+        expect(actual.print()).toEqual(expected.print());
+      });
+
+      expect(actual.equal(expected)).toEqual(true);
+    });
+
     // Images
 
     test('External image (no name)', () => {
