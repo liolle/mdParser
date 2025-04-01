@@ -1,6 +1,5 @@
 import { describe, expect, onTestFailed, suite, test } from 'vitest';
 import { TOKENIZER } from '../src/lexer/tokenizer';
-import { SUPPORTED_LANGUAGES } from '../src/token/code';
 import { Factory } from '../src/token/factory';
 import { TOKEN } from '../src/token/token';
 import { CONSTANT } from './constants';
@@ -715,6 +714,37 @@ describe('Parsing', () => {
 
       expect(actual.equal(expected)).toEqual(true);
     });
+
+    test('OrderedList Base',()=>{
+      const actual = Factory.ROOT(TOKENIZER.tokenize(CONSTANT.OrderedList))
+
+      const expected = Factory.ROOT([
+        Factory.NEW_LINE(),
+        Factory.OL([
+          Factory.LI('first ol', []),
+          Factory.LI('second ol', [
+
+            Factory.UL([Factory.LI('nested ul', [])]),
+            Factory.OL( [
+              Factory.LI('first nested ol', []),
+              Factory.LI('second nested ol', []),
+            ])
+          ]),
+          Factory.LI('third ol', [
+            Factory.OL([
+              Factory.LI('other nested ol', []),
+            ]),
+
+          ])
+        ]),
+      ])
+
+      onTestFailed(e => {
+        expect(actual.print()).toEqual(expected.print());
+      });
+
+      expect(actual.equal(expected)).toEqual(true);
+    })
 
     test('TaskList', () => {
       const actual = Factory.ROOT(TOKENIZER.tokenize(CONSTANT.BaseList2));
