@@ -1,7 +1,7 @@
 import { CodeToken, InlineCode, SUPPORTED_LANGUAGES } from './code';
 import { DECORATION_TYPE, Decoration } from './decoration';
 import { LinkToken, LINK_TOKEN_TYPE } from './links';
-import { CheckBoxToken, ListToken } from './list';
+import { CheckBoxToken, ListToken, LIToken, OLToken, ULToken } from './list';
 import {
   Heading,
   HEADING_TYPE,
@@ -45,7 +45,7 @@ export class Factory {
   }
 
   static LI(body: string, tokens: Token[], depth = 0) {
-    const t = [];
+    let t:Token[] =[];
     if (body != '') {
       t.push(Factory.WORD(body));
     }
@@ -54,11 +54,11 @@ export class Factory {
       t.push(token);
     }
 
-    return new ListToken('', t, depth, TOKEN.TOKEN_TYPE.LI);
+    return LIToken.createWithDepthTokens(depth,t );
   }
 
   static OL(tokens: Token[], depth = 0){
-    return new ListToken('', tokens, depth, TOKEN.TOKEN_TYPE.OL);
+    return OLToken.createWithDepthTokens(depth,tokens );
   }
 
   static PARAGRAPH(tokens: Token[]) {
@@ -66,7 +66,7 @@ export class Factory {
   }
 
   static UL(tokens: Token[], depth = 0) {
-    return new ListToken('', tokens, depth, TOKEN.TOKEN_TYPE.UL);
+    return ULToken.createWithDepthTokens(depth,tokens );
   }
 
   static ROOT(tokens: Token[]) {
