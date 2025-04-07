@@ -20,6 +20,7 @@ export namespace TOKEN {
     EXTERNAL_LINK = 'External_link',
     UL = 'Ul',
     LI = 'Li',
+    OL = 'Ol',
     INPUT = 'Input',
     CHECK_BOX = 'CheckBox',
     CHECK_BOX_UL = 'CheckBoxUL',

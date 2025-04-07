@@ -281,6 +281,7 @@ export namespace HANDLERS {
 
       let list: ListTokenBuilder;
       const last_element = lexer.last_pushed_token;
+
       switch (true) {
         case last_element instanceof ListToken:
           list = new ListTokenBuilder(last_element);

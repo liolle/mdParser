@@ -110,6 +110,11 @@ export namespace PATTERNS {
       handler: HANDLERS.listHandler(TOKEN.TOKEN_TYPE.UL),
       type: TOKEN.TOKEN_TYPE.UL,
     },
+    OL: {
+      regex: () => /(([ \t]*([0-9]+)\. [^\n]+)\n?)+/g,
+      handler: HANDLERS.listHandler(TOKEN.TOKEN_TYPE.OL),
+      type: TOKEN.TOKEN_TYPE.OL,
+    },
     LI: {
       regex: () => /([ \t]*- [^\n]+)\n?/g,
       handler: HANDLERS.listHandler(TOKEN.TOKEN_TYPE.UL),
@@ -123,6 +128,7 @@ export namespace PATTERNS {
   };
   export const ALL_PATTERNS: Pattern[] = [
     //
+    PAT.OL,
     PAT.UL,
     PAT.LI,
     PAT.NEW_LINE,

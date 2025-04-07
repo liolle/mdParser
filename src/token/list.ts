@@ -5,6 +5,7 @@ import { Token, TOKEN, Word } from './token';
 export type LIST_TOKEN_TYPE =
   | TOKEN.TOKEN_TYPE.UL
   | TOKEN.TOKEN_TYPE.LI
+  | TOKEN.TOKEN_TYPE.OL
   | TOKEN.TOKEN_TYPE.CHECK_BOX
   | TOKEN.TOKEN_TYPE.CHECK_BOX_UL;
 
@@ -12,13 +13,14 @@ export class ListToken extends Token {
   private _depth: number;
   private _last_modified_li: ListToken | null = null;
   private _last_modified_ul: ListToken | null = null;
+  private _last_modified_ol: ListToken | null = null;
   private _new_line_count = 0;
   private MAX_NEW_LINE = 1;
   constructor(
     body: string,
     children: Token[],
     depth: number,
-    kind: LIST_TOKEN_TYPE = TOKEN.TOKEN_TYPE.LI,
+    kind: LIST_TOKEN_TYPE = TOKEN.TOKEN_TYPE.LI ,
   ) {
     super(kind, body, children || []);
     this._depth = depth;
@@ -51,6 +53,11 @@ export class ListToken extends Token {
   get last_modified_ul() {
     return this._last_modified_ul;
   }
+
+    get last_modified_ol() {
+    return this._last_modified_ol;
+  }
+
 
   #fuseParagraph(body: string, tokens: Token[]) {
     let node = this.children[this.children.length - 1];
@@ -101,6 +108,11 @@ export class ListToken extends Token {
     this._last_modified_ul = token;
   }
 
+  setLastModifiedOL(token: ListToken) {
+    this._last_modified_ol = token;
+  }
+
+
   fuse(body: string, token: Token[]) {
     this.#fuseParagraph(body, token);
   }
@@ -125,6 +137,7 @@ export class ListTokenBuilder {
   constructor(token = new ListToken('', [], 0, TOKEN.TOKEN_TYPE.UL)) {
     this._token = token;
     this._tokens = [token];
+    
     if (token.last_modified_ul) {
       this._tokens.push(token.last_modified_ul);
     }
@@ -135,9 +148,20 @@ export class ListTokenBuilder {
 
   pushElement(raw_value: string) {
     if (raw_value == '') return;
-    const [spaces, body] = raw_value.split('- ');
+    let parts = ["",""]
+    if (/([ \t]*([0-9]+\.) [^\n]+)\n?/.test(raw_value)){
+      let p = raw_value.split('[0-9]*\. ');
+      if (p.length>1){
+        parts = p
+      }else{
+        parts[1]
+      }
+    }else if (/(([ \t]*- [^\n]+)\n?)+/.test(raw_value)){
+      parts = raw_value.split('- ');
+    }
+    let [spaces,body] = parts
     let depth = (spaces ? spaces.length : 0) + 1;
-    this.pushEl(body || '', depth);
+    this.#pushEl(body || '', depth);
   }
 
   #getNestedNode(body: string, depth: number): ListToken {
@@ -153,7 +177,7 @@ export class ListTokenBuilder {
     return Factory.LI('', TOKENIZER.tokenize(body), depth);
   }
 
-  pushEl(body: string, depth: number) {
+  #pushEl(body: string, depth: number) {
     const d = this._depth;
     const node = this.#findUl(depth);
     if (!node) {

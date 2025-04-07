@@ -57,6 +57,10 @@ export class Factory {
     return new ListToken('', t, depth, TOKEN.TOKEN_TYPE.LI);
   }
 
+  static OL(tokens: Token[], depth = 0){
+    return new ListToken('', tokens, depth, TOKEN.TOKEN_TYPE.OL);
+  }
+
   static PARAGRAPH(tokens: Token[]) {
     return new Paragraph('', tokens);
   }

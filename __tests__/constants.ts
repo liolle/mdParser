@@ -126,12 +126,11 @@ ${'```'}`;
 export const OrderedList = 
 String.raw
 `
-1. first ol 
-2. second ol 
+1. first ol
+2. second ol
   - nested ul
-  1. first nested ol 
+  1. first nested ol
   2. second nested ol
 3. third ol
-  1. other nested ol
-`
+  1. other nested ol`
 }
