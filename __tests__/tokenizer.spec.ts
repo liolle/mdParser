@@ -722,20 +722,17 @@ describe('Parsing', () => {
         Factory.NEW_LINE(),
         Factory.OL([
           Factory.LI('first ol', []),
-          Factory.LI('second ol', [
-
-            Factory.UL([Factory.LI('nested ul', [])]),
-            Factory.OL( [
-              Factory.LI('first nested ol', []),
-              Factory.LI('second nested ol', []),
-            ])
+          Factory.LI('second ol', []),
+          Factory.UL([Factory.LI('nested ul', [])]),
+          Factory.OL( [
+            Factory.LI('first nested ol', []),
+            Factory.LI('second nested ol', []),
           ]),
           Factory.LI('third ol', [
-            Factory.OL([
-              Factory.LI('other nested ol', []),
-            ]),
-
-          ])
+          ]),
+          Factory.OL([
+            Factory.LI('other nested ol', []),
+          ]),
         ]),
       ])
 

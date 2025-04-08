@@ -117,7 +117,7 @@ export namespace PATTERNS {
     },
     LI: {
       regex: () => /([ \t]*- [^\n]+)\n?/g,
-      handler: HANDLERS.listHandler(TOKEN.TOKEN_TYPE.UL),
+      handler: HANDLERS.listHandler(TOKEN.TOKEN_TYPE.LI),
       type: TOKEN.TOKEN_TYPE.LI,
     },
     CHECK_BOX: {

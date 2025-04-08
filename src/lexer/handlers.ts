@@ -1,6 +1,6 @@
 import { Factory } from '../token/factory';
 import { LINK_TOKEN_TYPE, LinkToken } from '../token/links';
-import { ListToken, ListTokenBuilder, OLToken } from '../token/list';
+import { LIST_TOKEN_TYPE, ListToken, ListTokenBuilder, OLToken } from '../token/list';
 import { Heading, HEADING_TYPE, Token, TOKEN } from '../token/token';
 import { NestedIdx } from '../types';
 import { combineRages } from '../utils';
@@ -62,7 +62,6 @@ export namespace HANDLERS {
               lexer.push(Factory.WORD(word.word));
             }
           } else {
-            console.log(raw_value)
             last_pushed_token.fuse(word.word, tokens);
           }
           break;
@@ -276,7 +275,7 @@ export namespace HANDLERS {
     };
   }
 
-  export function listHandler(type: TOKEN.TOKEN_TYPE) {
+  export function listHandler(type: LIST_TOKEN_TYPE) {
     return (lexer: Lexer.Lexer, regex: RegExp, raw_value: string) => {
       // extract body
 
@@ -287,14 +286,11 @@ export namespace HANDLERS {
         case last_element instanceof ListToken:
           list = new ListTokenBuilder(last_element);
           for (const line of raw_value.split('\n')) {
-            list.pushElement(line);
+            list.pushElement(line,type);
           }
           break;
         default:
           switch (type) {
-            case TOKEN.TOKEN_TYPE.UL:
-              list = new ListTokenBuilder();
-              break;
             case TOKEN.TOKEN_TYPE.OL:
               list = new ListTokenBuilder(OLToken.createDefault());
               break;
@@ -304,7 +300,7 @@ export namespace HANDLERS {
           }
 
           for (const line of raw_value.split('\n')) {
-            list.pushElement(line);
+            list.pushElement(line,type);
           }
 
           lexer.push(list.token);

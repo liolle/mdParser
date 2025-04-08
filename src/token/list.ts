@@ -71,7 +71,6 @@ export abstract class ListToken extends Token {
       const child = tokens[i];
       if (!child) break;
       if (child.type != TOKEN.TOKEN_TYPE.WORD) break;
-      console.log("->",child,last_node)
       last_node.appendWord(child);
     }
 
@@ -186,7 +185,6 @@ export class ListTokenBuilder {
   private _token: ListToken;
   private _last_pushed: ListToken | null = null;
   private _tokens: ListToken[];
-  private _depth = 0;
 
   constructor(token = ULToken.createDefault()) {
     this._token = token;
@@ -201,19 +199,18 @@ export class ListTokenBuilder {
     }
   }
 
-  pushElement(raw_value: string) {
+  pushElement(raw_value: string, type: LIST_TOKEN_TYPE) {
     if (raw_value == '') return;
+
     let parts = ["",""]
-    let type:LIST_TOKEN_TYPE = TOKEN.TOKEN_TYPE.UL;
-    if (/([ \t]*([0-9]+\.) [^\n]+)\n?/.test(raw_value)){
-      let p = raw_value.split('[0-9]*\. ');
+    if (type == TOKEN.TOKEN_TYPE.OL){
+      let p = raw_value.split(/[0-9]*\. /);
       if (p.length>1){
         parts = p
       }else{
         parts[1]
       }
-      type = TOKEN.TOKEN_TYPE.OL
-    }else if (/(([ \t]*- [^\n]+)\n?)+/.test(raw_value)){
+    }else {
       parts = raw_value.split('- ');
     }
     let [spaces,body] = parts
@@ -246,6 +243,7 @@ export class ListTokenBuilder {
   }
 
   #findGroup(depth: number, type: LIST_TOKEN_TYPE) {
+
     let last_group = this.#last;
     let last_node = this._last_pushed;
 
@@ -253,22 +251,46 @@ export class ListTokenBuilder {
       return;
     }
 
+    let is_list_type_change = type != last_group.type && depth == last_group.depth 
+    if (is_list_type_change){
+      this._tokens.pop();
+      last_group = this.#last;
+    }
+
+    if (!last_group) {
+      return;
+    }
+
+    if(is_list_type_change){
+      let group:ListToken = this.#CreateGroupWithDepth(depth,type);
+      if(type == TOKEN.TOKEN_TYPE.UL){
+        group=ULToken.createWithDepth(depth);
+      }else{
+        group=OLToken.createWithDepth(depth);
+      }
+
+      last_group.pushToChildren(group);
+      this._tokens.push(group);
+      return group;
+    }
+
     if (!last_node || depth == last_node.depth) {
       return last_group;
     }
 
-    if (depth > last_node.depth) {
-
+    if (depth > last_node.depth || type != last_group.type) {
       let group:ListToken;
       if(type == TOKEN.TOKEN_TYPE.UL){
         group=ULToken.createWithDepth(depth);
       }else{
         group=OLToken.createWithDepth(depth);
       }
+
       last_group.pushToChildren(group);
       this._tokens.push(group);
       return group;
     } else {
+
       while (last_group && depth < last_group.depth) {
         this._tokens.pop();
         last_group = this.#last;
@@ -276,6 +298,16 @@ export class ListTokenBuilder {
 
       return last_group;
     }
+  }
+
+  #CreateGroupWithDepth(depth:number,type:LIST_TOKEN_TYPE = TOKEN.TOKEN_TYPE.UL):ListToken{
+    let group:ListToken;
+    if(type == TOKEN.TOKEN_TYPE.UL){
+      group=ULToken.createWithDepth(depth);
+    }else{
+      group=OLToken.createWithDepth(depth);
+    }
+    return group;
   }
 
   get #size() {
