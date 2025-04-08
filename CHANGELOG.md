@@ -1,5 +1,11 @@
 # md-parser
 
+## 2.1.0
+
+### Minor Changes
+
+- 68ad494: [Add] OL parsing support
+
 ## 2.0.11
 
 ### Patch Changes
