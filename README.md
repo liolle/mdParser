@@ -16,7 +16,7 @@ npm install @edllx/md-parser
 | Name           |          |              |          |
 | -------------- | -------- | ------------ | -------- |
 | Heading        | &#x2705; | Tables       | &#x274c; |
-| Unordered list | &#x2705; | Ordered list | &#x274c; |
+| Unordered list | &#x2705; | Ordered list | &#x2705; |
 | Bold           | &#x2705; | Quotes       | &#x274c; |
 | Italic         | &#x2705; | Unicode      | &#x274c; |
 | Links          | &#x2705; |              |          |
