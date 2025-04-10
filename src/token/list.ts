@@ -243,17 +243,17 @@ export class ListTokenBuilder {
   }
 
   #findGroup(depth: number, type: LIST_TOKEN_TYPE) {
-
+    // use enum flags 
+    // way to many edge case
     let last_group = this.#last;
     let last_node = this._last_pushed;
+    let last_poped;
 
-    if (!last_group) {
-      return;
-    }
+    if (!last_group) {return}
+    let is_list_type_change = type != last_group.type  
 
-    let is_list_type_change = type != last_group.type && depth == last_group.depth 
     if (is_list_type_change){
-      this._tokens.pop();
+      last_poped = this._tokens.pop();
       last_group = this.#last;
     }
 
@@ -267,6 +267,10 @@ export class ListTokenBuilder {
         group=ULToken.createWithDepth(depth);
       }else{
         group=OLToken.createWithDepth(depth);
+      }
+
+      if (last_group.type == type && last_poped && last_poped.depth >= depth ){
+        return last_group;
       }
 
       last_group.pushToChildren(group);

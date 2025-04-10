@@ -133,4 +133,38 @@ String.raw
   2. second nested ol
 3. third ol
   1. other nested ol`
+
+export const OrderedListIndentation1 =
+String.raw
+`
+1. first ol
+2. second ol
+  - nested ul
+1. first nested ol
+  2. second nested ol
+3. third ol
+  1. other nested ol`
+
+export const AlterningList1 =
+String.raw
+`1. ligne 1
+- ligne 2
+2. ligne 3
+- ligne 4`
+
+export const AlterningList2 =
+String.raw
+`1. ligne 1
+  - ligne 2
+    2. ligne 3
+- ligne 4`
+
+export const AlterningList3 =
+String.raw
+`1. ligne 1
+  - ligne 2
+  2. ligne 3
+- ligne 4`
+
+
 }
