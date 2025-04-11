@@ -243,15 +243,67 @@ export class ListTokenBuilder {
   }
 
   #findGroup(depth: number, type: LIST_TOKEN_TYPE) {
-    // use enum flags 
-    // way to many edge case
+    const enum StateFlags {
+      LIST_TYPE_CHANGED = 1 << 0,  // 1
+      DEPTH_EQ          = 1 << 1,  // 2
+      DEPTH_QT          = 1 << 2,  // 4
+      DEPTH_ST          = 1 << 3,  // 8
+      LAST_WAS_UL       = 1 << 4,  // 16
+      LAST_WAS_OL       = 1 << 5,  // 32
+      ELEM_IS_UL        = 1 << 6,  // 64
+      ELEM_IS_OL        = 1 << 7   // 128
+    }
+
     let last_group = this.#last;
     let last_node = this._last_pushed;
     let last_poped;
 
-    if (!last_group) {return}
-    let is_list_type_change = type != last_group.type  
+    if (!last_group) {return null}
 
+   // Build state flags
+    let state = 0;
+    state |= type != last_group.type ? StateFlags.LIST_TYPE_CHANGED : 0;
+    state |= depth == last_group.depth ? StateFlags.DEPTH_EQ : 0;
+    state |= depth > last_group.depth ? StateFlags.DEPTH_QT : 0;
+    state |= depth < last_group.depth ? StateFlags.DEPTH_ST : 0;
+    state |= last_group instanceof ULToken ? StateFlags.LAST_WAS_UL : 0;
+    state |= last_group instanceof OLToken ? StateFlags.LAST_WAS_OL : 0;
+    state |= type == TOKEN.TOKEN_TYPE.UL ? StateFlags.ELEM_IS_UL : 0;
+    state |= type == TOKEN.TOKEN_TYPE.OL ? StateFlags.ELEM_IS_OL : 0;
+
+
+    // Helper function to create appropriate group
+    const createGroup = (): ListToken => {
+      switch (type) {
+        case TOKEN.TOKEN_TYPE.UL:
+          return ULToken.createWithDepth(depth);
+        case TOKEN.TOKEN_TYPE.OL:
+          return OLToken.createWithDepth(depth);
+        default:
+          throw new Error(`Unknown list token type: ${type}`);
+      }
+    };
+
+    if (state != 84){
+      console.log(state)
+
+    }
+    let group = last_group
+    // Main logic using switch
+    switch (state) {
+      case StateFlags.ELEM_IS_UL | StateFlags.LAST_WAS_UL | StateFlags.DEPTH_QT:
+        // Create a new nested group 
+        //group=ULToken.createWithDepth(depth);
+        group = last_group;
+        break
+      default:
+        break
+    }
+
+    return group;
+
+
+    /*
     if (is_list_type_change){
       last_poped = this._tokens.pop();
       last_group = this.#last;
@@ -302,6 +354,8 @@ export class ListTokenBuilder {
 
       return last_group;
     }
+    */
+    return null
   }
 
   #CreateGroupWithDepth(depth:number,type:LIST_TOKEN_TYPE = TOKEN.TOKEN_TYPE.UL):ListToken{
