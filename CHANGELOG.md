@@ -1,5 +1,12 @@
 # md-parser
 
+## 2.1.1
+
+### Patch Changes
+
+- beee9e0: [Update] OL parsing
+  - list indentation
+
 ## 2.1.0
 
 ### Minor Changes
