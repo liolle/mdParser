@@ -232,6 +232,7 @@ export class ListTokenBuilder {
   }
 
   #pushEl(body: string, depth: number,type:LIST_TOKEN_TYPE) {
+
     const node = this.#findGroup(depth,type);
     if (!node) {
       return;
@@ -242,16 +243,19 @@ export class ListTokenBuilder {
     this._token.setLastModifiedLi(this._last_pushed);
   }
 
-  #findGroup(depth: number, type: LIST_TOKEN_TYPE) {
+  #findGroup(depth: number, type: LIST_TOKEN_TYPE):ListToken|null {
     const enum StateFlags {
-      LIST_TYPE_CHANGED = 1 << 0,  // 1
+      LIST_ROOT         = 1 << 0,  // 1
       DEPTH_EQ          = 1 << 1,  // 2
-      DEPTH_QT          = 1 << 2,  // 4
+      DEPTH_GT          = 1 << 2,  // 4
       DEPTH_ST          = 1 << 3,  // 8
       LAST_WAS_UL       = 1 << 4,  // 16
       LAST_WAS_OL       = 1 << 5,  // 32
       ELEM_IS_UL        = 1 << 6,  // 64
-      ELEM_IS_OL        = 1 << 7   // 128
+      ELEM_IS_OL        = 1 << 7,  // 128
+      DP_GT             = 1 << 8,  // 256
+      DP_EQ             = 1 << 9,  // 512
+      DP_ST             = 1 << 10  // 1024
     }
 
     let last_group = this.#last;
@@ -260,17 +264,21 @@ export class ListTokenBuilder {
 
     if (!last_group) {return null}
 
+    let dp = this._last_pushed?.depth ?? 0
+
    // Build state flags
     let state = 0;
-    state |= type != last_group.type ? StateFlags.LIST_TYPE_CHANGED : 0;
+    state |= last_group.depth == 0 || dp == 1 ? StateFlags.LIST_ROOT : 0;
     state |= depth == last_group.depth ? StateFlags.DEPTH_EQ : 0;
-    state |= depth > last_group.depth ? StateFlags.DEPTH_QT : 0;
+    state |= depth > last_group.depth ? StateFlags.DEPTH_GT : 0;
     state |= depth < last_group.depth ? StateFlags.DEPTH_ST : 0;
     state |= last_group instanceof ULToken ? StateFlags.LAST_WAS_UL : 0;
     state |= last_group instanceof OLToken ? StateFlags.LAST_WAS_OL : 0;
     state |= type == TOKEN.TOKEN_TYPE.UL ? StateFlags.ELEM_IS_UL : 0;
     state |= type == TOKEN.TOKEN_TYPE.OL ? StateFlags.ELEM_IS_OL : 0;
-
+    state |= depth == dp && dp != 0 ? StateFlags.DP_EQ : 0;
+    state |= depth > dp && dp != 0 ? StateFlags.DP_GT : 0;
+    state |= depth < dp && dp != 0 ? StateFlags.DP_ST : 0;
 
     // Helper function to create appropriate group
     const createGroup = (): ListToken => {
@@ -284,78 +292,70 @@ export class ListTokenBuilder {
       }
     };
 
-    if (state != 84){
-      console.log(state)
 
-    }
-    let group = last_group
+    let group:ListToken|undefined = last_group
     // Main logic using switch
     switch (state) {
-      case StateFlags.ELEM_IS_UL | StateFlags.LAST_WAS_UL | StateFlags.DEPTH_QT:
-        // Create a new nested group 
-        //group=ULToken.createWithDepth(depth);
+      case 85: 
+      case 165:
+      case 594:
+      case 674:
+      case 677:
+      case 597:
         group = last_group;
         break
+
+      case 404 :
+      case 421 :
+        group=OLToken.createWithDepth(depth);
+        last_group.pushToChildren(group);
+        this._tokens.push(group);
+        break
+
+      case 610 :
+      case 613 :
+      case 340:
+      case 341:
+      case 357:
+      case 1125 :
+        // Create a new nested group
+        group=ULToken.createWithDepth(depth);
+        last_group.pushToChildren(group);
+        this._tokens.push(group);
+        break
+
+      case 658:
+        // Pop last UL and add a new OL 
+        last_poped = this._tokens.pop();
+        last_group = this.#last;
+        if(!last_group){break}
+        group=OLToken.createWithDepth(depth);
+        last_group.pushToChildren(group)
+        this._tokens.push(group);
+        break
+
+      case 659:
+        // Pop last UL and add append  
+        last_poped = this._tokens.pop();
+        last_group = this.#last;
+        group = last_group;
+        break
+
+      case 1112 :
+      case 1128 :
+      case 1192 :
+      case 1176 :
+        while (last_group && depth < last_group.depth) {
+          this._tokens.pop();
+          last_group = this.#last;
+        }
+        return this.#findGroup(depth,type)
+
       default:
         break
     }
 
-    return group;
-
-
-    /*
-    if (is_list_type_change){
-      last_poped = this._tokens.pop();
-      last_group = this.#last;
-    }
-
-    if (!last_group) {
-      return;
-    }
-
-    if(is_list_type_change){
-      let group:ListToken = this.#CreateGroupWithDepth(depth,type);
-      if(type == TOKEN.TOKEN_TYPE.UL){
-        group=ULToken.createWithDepth(depth);
-      }else{
-        group=OLToken.createWithDepth(depth);
-      }
-
-      if (last_group.type == type && last_poped && last_poped.depth >= depth ){
-        return last_group;
-      }
-
-      last_group.pushToChildren(group);
-      this._tokens.push(group);
-      return group;
-    }
-
-    if (!last_node || depth == last_node.depth) {
-      return last_group;
-    }
-
-    if (depth > last_node.depth || type != last_group.type) {
-      let group:ListToken;
-      if(type == TOKEN.TOKEN_TYPE.UL){
-        group=ULToken.createWithDepth(depth);
-      }else{
-        group=OLToken.createWithDepth(depth);
-      }
-
-      last_group.pushToChildren(group);
-      this._tokens.push(group);
-      return group;
-    } else {
-
-      while (last_group && depth < last_group.depth) {
-        this._tokens.pop();
-        last_group = this.#last;
-      }
-
-      return last_group;
-    }
-    */
-    return null
+    return group || null;
   }
 
   #CreateGroupWithDepth(depth:number,type:LIST_TOKEN_TYPE = TOKEN.TOKEN_TYPE.UL):ListToken{

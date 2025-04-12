@@ -140,9 +140,9 @@ String.raw
 1. first ol
 2. second ol
   - nested ul
-1. first nested ol
-  2. second nested ol
-3. third ol
+3. first nested ol
+  1. second nested ol
+4. third ol
   1. other nested ol`
 
 export const AlterningList1 =

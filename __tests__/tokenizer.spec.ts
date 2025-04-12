@@ -724,10 +724,11 @@ describe('Parsing', () => {
           Factory.LI('first ol', []),
           Factory.LI('second ol', []),
           Factory.UL([Factory.LI('nested ul', [])]),
-          Factory.LI('first nested ol', []),
-          Factory.LI('second nested ol', []),
-          Factory.LI('third ol', [
+          Factory.OL([
+            Factory.LI('first nested ol', []),
+            Factory.LI('second nested ol', []),
           ]),
+          Factory.LI('third ol', []),
           Factory.OL([
             Factory.LI('other nested ol', []),
           ]),
@@ -768,8 +769,8 @@ describe('Parsing', () => {
       expect(actual.equal(expected)).toEqual(true);
     })
 
-    test('Alternatin List',()=>{
-      
+    test('Alternating List',()=>{
+
       const actual = Factory.ROOT(TOKENIZER.tokenize(CONSTANT.AlterningList1))
 
       const expected = Factory.ROOT([
@@ -788,7 +789,7 @@ describe('Parsing', () => {
       expect(actual.equal(expected)).toEqual(true);
     })
 
-    test('Alternatin List 2',()=>{
+    test('Alternating List 2',()=>{
 
       const actual = Factory.ROOT(TOKENIZER.tokenize(CONSTANT.AlterningList2))
 
@@ -812,15 +813,15 @@ describe('Parsing', () => {
       expect(actual.equal(expected)).toEqual(true);
     })
 
-    test('Alternatin List 2',()=>{
+    test('Alternating List 3',()=>{
 
-      const actual = Factory.ROOT(TOKENIZER.tokenize(CONSTANT.AlterningList1))
+      const actual = Factory.ROOT(TOKENIZER.tokenize(CONSTANT.AlterningList3))
 
       const expected = Factory.ROOT([
         Factory.OL([
           Factory.LI('ligne 1', []),
           Factory.UL([Factory.LI('ligne 2', [])]),
-          Factory.LI('ligne 3', []),
+          Factory.OL([Factory.LI('ligne 3', [])]),
           Factory.UL([Factory.LI('ligne 4', [])]),
         ]),
       ])
